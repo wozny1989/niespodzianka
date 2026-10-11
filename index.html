@@ -195,6 +195,31 @@
   .toast { text-align: center; font-weight: 800; color: var(--warn); min-height: 1.5em; margin: 0; }
   .toast.ok { color: var(--ok); }
 
+  .media { display: flex; flex-direction: column; gap: 10px; }
+  .photo-box { position: relative; width: 100%; max-width: 340px; aspect-ratio: 1 / 1; margin: 0 auto; border-radius: 18px; overflow: hidden; background: color-mix(in srgb, var(--fg) 8%, var(--surface)); box-shadow: inset 0 0 0 2px var(--line); }
+  .photo-box.loading { display: grid; place-items: center; }
+  .photo-box img { width: 100%; height: 100%; max-width: 100%; object-fit: cover; display: block; transition: transform 1.3s cubic-bezier(.3, .8, .2, 1); user-select: none; -webkit-user-select: none; }
+  .lens-badge { position: absolute; left: 10px; bottom: 10px; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: .8rem; background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--fg); font-variant-numeric: tabular-nums; }
+  .photo-box.revealed .lens-badge { display: none; }
+  .spin { width: 36px; height: 36px; border: 4px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .caption { margin: 0; text-align: center; font-family: var(--font-hand); font-weight: 700; font-size: 1.45rem; line-height: 1.2; color: var(--fg); text-wrap: balance; animation: enter .4s ease-out both; }
+  .puzzle { position: relative; width: 100%; max-width: 340px; aspect-ratio: 1 / 1; margin: 0 auto; border-radius: 18px; overflow: hidden; background: color-mix(in srgb, var(--fg) 10%, var(--surface)); touch-action: manipulation; }
+  .tile { position: absolute; top: 0; left: 0; width: calc(100% / var(--n)); height: calc(100% / var(--n)); padding: 0; border: 0; cursor: pointer; background-size: calc(var(--n) * 100%) calc(var(--n) * 100%); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--surface) 80%, transparent); transition: transform .16s ease-out; border-radius: 6px; }
+  .tile.blank { visibility: hidden; }
+  .tile:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; z-index: 2; }
+  .puzzle.solved .tile { box-shadow: none; border-radius: 0; cursor: default; }
+  .puzzle.solved .tile.blank { visibility: visible; animation: fadein .5s ease-out both; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .pz-peek { position: absolute; inset: 0; background-size: cover; z-index: 3; }
+  .pz-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 800; font-size: .88rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pz-bar .linkish { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .lock { display: flex; flex-direction: column; gap: 10px; text-align: center; padding: 16px; border-radius: 18px; border: 2px dashed var(--line); }
+  .lock p { margin: 0; color: var(--muted); }
+  .lock-ico { font-size: 2.4rem; }
+  .lock input { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; text-align: center; border: 2px solid var(--line); border-radius: 14px; padding: 10px; background: var(--surface); color: var(--fg); width: 100%; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
   .ticket {
     position: relative; border-radius: 18px; padding: 16px 16px 14px;
     background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, var(--surface)), color-mix(in srgb, var(--gold-hi) 22%, var(--surface)));
@@ -257,14 +282,14 @@
 
 <div class="wrap">
   <header class="head">
-    <div class="eyebrow" id="eyebrow">Urodzinowa niespodzianka</div>
+    <div class="eyebrow" id="eyebrow">15 urodziny · niespodzianka</div>
     <h1 id="headTitle">Cześć <span class="hl">Klaudio</span>!</h1>
     <p class="sub" id="headSub">Mam dla Ciebie coś ekstra… ale tak łatwo nie będzie 😏</p>
   </header>
 
   <ol class="steps" id="steps" hidden>
     <li data-step="scan"><span class="n">1</span><span>Karta</span></li>
-    <li data-step="quiz"><span class="n">2</span><span>Quiz</span></li>
+    <li data-step="quiz"><span class="n">2</span><span>Zagadki</span></li>
     <li data-step="scratch"><span class="n">3</span><span>Zdrapka</span></li>
     <li data-step="finale"><span class="n">4</span><span>Prezent</span></li>
   </ol>
@@ -329,14 +354,17 @@
     </div>
     <div class="qbody" id="qbody">
       <p class="qtext" id="qtext"></p>
+      <div class="media" id="media" hidden></div>
       <div class="opts" id="opts"></div>
+      <p class="caption" id="caption" hidden></p>
+      <button class="btn" id="nextBtn" type="button" hidden>Dalej →</button>
     </div>
     <p class="toast" id="toast" role="status"></p>
   </section>
 
   <section class="panel" id="scratchPanel" hidden>
     <div class="ticket">
-      <div class="ticket-top"><span>Zdrapka urodzinowa</span><span class="serial">Nº 0001</span></div>
+      <div class="ticket-top"><span>Zdrapka urodzinowa</span><span class="serial">Nº 15</span></div>
       <div class="ticket-win" id="ticketWin">
         <div class="prize" id="prize">
           <span class="prize-sub" aria-hidden="true">💸</span>
@@ -354,13 +382,13 @@
 
   <section class="panel" id="finalePanel" hidden>
     <div class="gcard" id="gcard">
-      <div class="gc-top"><span>Karta prezentowa</span><span class="chip" aria-hidden="true"></span></div>
+      <div class="gc-top"><span>Karta prezentowa · 15 lat</span><span class="chip" aria-hidden="true"></span></div>
       <div class="gc-amt"><span id="fAmount">0</span> <small>zł</small></div>
       <div class="gc-name" id="gcName"></div>
     </div>
     <div class="letter">
       <p id="fMsg"></p>
-      <p class="sign">wujcio 💋</p>
+      <p class="sign">wujcio 🤠</p>
     </div>
     <a class="btn" id="futureLink" target="_blank" rel="noopener">💳 Sprawdź saldo karty ↗</a>
     <p class="note split" id="futureNote"></p>
@@ -383,33 +411,45 @@
     balance: 300,
     futureUrl: 'https://www.finpay.pl/stansrodkow',
     introText: 'Pewnie myślisz: „ile wujcio tam przelał na kartę?” 🤔 Ha! Nie tak łatwo. Zanim poznasz kwotę, czeka Cię kilka zadań 😏',
-    finaleMsg: '{name}, wszystkiego najlepszego! Leć do Sfery i szalej, bo dziś Ci wszystko wolno 🛍️✨ Buziaki!',
+    finaleMsg: '{name}, wszystkiego najlepszego na 15. urodziny! Leć do Sfery i szalej, bo dziś Ci wszystko wolno 🛍️✨ Buziaki!',
     futureNote: 'Saldo karty sprawdzisz zawsze na finpay.pl/stansrodkow',
     scratchGoal: 0.55,
     questions: [
-      { q: 'Zacznijmy od ważnego pytania: co jest NAJLEPSZE w urodzinach?',
-        opts: ['Tort 🎂', 'Prezenty! 🎁', 'Życzenia 💌', 'Sprzątanie po imprezie 🧹'], ok: 1,
+      { q: 'Rozgrzewka! Co jest NAJLEPSZE w urodzinach?',
+        opts: ['Tort 🎂', 'Prezenty! 🎁', 'Życzenia od cioć przez telefon 📞', 'Sprzątanie po imprezie 🧹'], ok: 1,
         toast: 'Noo błagam, kto tak uważa? 😄 Jeszcze raz!' },
-      { q: 'Kto wymyślił tę całą zwariowaną niespodziankę?',
-        opts: ['Wujcio 😎', 'Mikołaj 🎅', 'Sąsiad z parteru 🤔', 'Yeti ❄️'], ok: 0,
-        toast: 'Hahaha, no coś Ty! Pomyśl… 🤭' },
-      { q: 'Zagadka! Mam cyferki, uwielbiam sklepy, a w środku chowam niespodziankę. Co to?',
-        opts: ['Kalkulator 🧮', 'Karta podarunkowa 💳', 'Pilot do TV 📺', 'Zegarek ⌚'], ok: 1,
-        toast: 'Blisko… ale nie! 😏' },
-      { q: 'Szybka matma urodzinowa: ile prezentów to za mało?',
-        opts: ['Jeden 1️⃣', 'Nigdy nie jest za mało! ♾️', 'Dziesięć 🔟', 'Zero 🚫'], ok: 1,
-        toast: 'Eee, policz jeszcze raz! 😄' },
+      { type: 'zoom', q: 'Super zbliżenie! 🔍 Co to jest?',
+        scale: 9, objPos: '50% 30%', origin: '51.8% 52.4%',
+        opts: ['Wisienka z tortu 🍒', 'Piłeczka do ping-ponga 🏓', 'Nos wujcia w trybie Rudolf 🦌', 'Pomidorek koktajlowy 🍅'], ok: 2,
+        toasts: ['Mniam, ale nie 🍒😄', 'Ping… pudło! 🏓', '', 'Ciepło, ciepło… ale nie 🍅'],
+        okToast: 'Bingo! To nos wujcia 🔴',
+        caption: 'Wujcio jako Rudolf Czerwononosy i mała Klaudia, która już wtedy wiedziała, że z wujciem jest najlepsza zabawa 🦌✨' },
+      { q: 'Kto jest Twoim ulubionym wujciem?',
+        opts: ['Wujcio 🤠', 'Wujcio 🤠', 'Wujcio 🤠', 'Jakiś inny wujek 🙄'], ok: [0, 1, 2],
+        toast: 'Słucham?! Nie ma takiej opcji 😤 Spróbuj jeszcze raz.',
+        okToast: 'Każda odpowiedź dobra, bo każda to wujcio 🤠' },
+      { type: 'blur', q: 'Kto to? Zdjęcie się wyostrza, zgaduj jak najszybciej! 🧐',
+        maxBlur: 26, seconds: 15, objPos: '45% 50%',
+        opts: ['Pan Wołodyjowski na emeryturze ⚔️', 'Zorro z rodzinnych ogródków 🦊', 'Dziadek, postrach kretów 🗡️', 'Jedi z Castoramy ✨'], ok: 2,
+        toasts: ['Mały rycerz? Ten nie jest taki mały 😄', 'Zorro nosi maskę, a ten czapkę z daszkiem 🧢', '', 'Miecz świetlny jakiś taki… stalowy 🤔'],
+        okToast: 'Tak! To dziadek w pełnej gotowości bojowej ⚔️',
+        caption: 'Dziadek w trybie bojowym. Krety, mszyce i niewierni drżą ze strachu 🗡️🌳' },
+      { q: 'Ile świeczek dziś na torcie?',
+        opts: ['14 🕯️', '15 🎂', '16 🙃', 'Tyle, że trzeba wezwać straż pożarną 🚒'], ok: 1,
+        toasts: ['Rok temu! Coś Ci uciekło 😄', '', 'Spokojnie, nie przyspieszaj 😅', 'Haha, prawie… ale dokładnie ile? 🚒'] },
+      { type: 'puzzle', q: 'Ułóż zdjęcie! 🧩 Stukaj w kafelki obok pustego pola.',
+        size: 3,
+        caption: 'Hau hau! 🐶 Najsłodszy piesek w rodzinie właśnie skończył 15 lat. To taka piętnastka, tylko w wersji light 😉' },
       { q: 'Ostatnie pytanie! Gotowa poznać swoją niespodziankę?',
         opts: ['TAK!!! 🙌', 'Jeszcze chwilkę 😬', 'Może jutro 😴', 'Nie wiem 🤷‍♀️'], ok: 0,
         toast: 'Oj tam, na pewno TAK! 😜' }
     ]
   };
-
   var STORE_KEY = 'urodziny-klaudia-v2';
   var STAGES = ['intro', 'scan', 'quiz', 'scratch', 'finale'];
   var $ = function (id) { return document.getElementById(id); };
   var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  var state = { stage: 'intro', qi: 0 };
+  var state = { stage: 'intro', qi: 0, key: '' };
   var timers = [];
 
   function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
@@ -471,11 +511,11 @@
 
   var panels = { intro: $('introPanel'), scan: $('scanPanel'), quiz: $('quizPanel'), scratch: $('scratchPanel'), finale: $('finalePanel') };
   var HEADS = {
-    intro:   ['Urodzinowa niespodzianka', 'Cześć <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Mam dla Ciebie coś ekstra… ale tak łatwo nie będzie 😏'],
+    intro:   ['15 urodziny · niespodzianka', 'Cześć <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Mam dla Ciebie coś ekstra… ale tak łatwo nie będzie 😏'],
     scan:    ['Krok 1 · Karta 🔑', 'Pokaż kartę', 'Wyceluj aparat w kod QR na karcie, żeby odblokować zabawę.'],
-    quiz:    ['Krok 2 · Quiz 🧩', 'Szybki quiz', 'Pięć pytań. Pomyłki wolno, poddawać się nie 😉'],
+    quiz:    ['Krok 2 · Zagadki 🧩', 'Zagadki', 'Pytania, zdjęcia i jedna układanka. Pomyłki wolno, poddawać się nie 😉'],
     scratch: ['Krok 3 · Zdrapka ✨', 'Ile tam jest?', 'Zdrap złote pole i sprawdź, co wujcio wrzucił na kartę.'],
-    finale:  ['Krok 4 · Prezent 🎁', 'Sto lat, <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Wszystko odblokowane. Oto Twój prezent ✨']
+    finale:  ['Krok 4 · Prezent 🎁', 'Sto lat, <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Piętnastka odblokowana. Oto Twój prezent ✨']
   };
 
   function show(stage) {
@@ -816,8 +856,13 @@
     if (/finpay\.pl\/stansrodkow/i.test(v)) return Promise.resolve(true);
     var digits = v.replace(/\D/g, ''), L = CONFIG.cardLen, jobs = [];
     if (!window.crypto || !crypto.subtle) return Promise.resolve(false);
-    for (var i = 0; i + L <= digits.length; i++) jobs.push(sha256(digits.substr(i, L)));
-    return Promise.all(jobs).then(function (hs) { return hs.indexOf(CONFIG.cardHash) !== -1; });
+    var wins = [];
+    for (var i = 0; i + L <= digits.length; i++) { wins.push(digits.substr(i, L)); jobs.push(sha256(digits.substr(i, L))); }
+    return Promise.all(jobs).then(function (hs) {
+      var at = hs.indexOf(CONFIG.cardHash);
+      if (at !== -1) { state.key = wins[at]; save(); }
+      return at !== -1;
+    });
   }
   function cardAccepted() {
     setVF('ok');
@@ -851,11 +896,52 @@
     sfx.bad(); buzz(120);
   }
 
-  function startQuiz(qi) { state.qi = qi || 0; show('quiz'); renderQ(); }
+  var photos = null, photosJob = null, blurTimer = null;
+  var pz = null;
+
+  function deriveKey(digits, salt) {
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(digits), 'PBKDF2', false, ['deriveKey']).then(function (base) {
+      return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 250000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    });
+  }
+  function loadPhotos() {
+    if (photos) return Promise.resolve(photos);
+    if (!state.key) return Promise.reject(new Error('no_key'));
+    if (photosJob) return photosJob;
+    photosJob = fetch('zdjecia.bin', { cache: 'force-cache' }).then(function (r) {
+      if (!r.ok) throw new Error('fetch');
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var all = new Uint8Array(buf);
+      return deriveKey(state.key, all.slice(0, 16)).then(function (key) {
+        return crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(16, 28) }, key, all.slice(28));
+      });
+    }).then(function (plain) {
+      photos = JSON.parse(new TextDecoder().decode(plain));
+      return photos;
+    }).catch(function (e) { photosJob = null; throw e; });
+    return photosJob;
+  }
+
+  function startQuiz(qi) {
+    state.qi = qi || 0;
+    show('quiz');
+    loadPhotos().catch(function () {});
+    renderQ();
+  }
+  function clearRound() {
+    clearInterval(blurTimer); blurTimer = null;
+    pz = null;
+    $('media').innerHTML = ''; $('media').hidden = true;
+    $('caption').hidden = true; $('caption').textContent = '';
+    $('nextBtn').hidden = true;
+    $('opts').innerHTML = '';
+  }
   function renderQ() {
+    clearRound();
     var q = CONFIG.questions[state.qi];
     $('toast').textContent = ''; $('toast').className = 'toast';
-    $('qcount').textContent = 'Pytanie ' + (state.qi + 1) + ' z ' + CONFIG.questions.length;
+    $('qcount').textContent = 'Zagadka ' + (state.qi + 1) + ' z ' + CONFIG.questions.length;
     $('qtext').textContent = q.q;
     var d = $('dots'); d.innerHTML = '';
     for (var i = 0; i < CONFIG.questions.length; i++) {
@@ -863,6 +949,41 @@
       el.className = i < state.qi ? 'done' : (i === state.qi ? 'now' : '');
       d.appendChild(el);
     }
+    var body = $('qbody'); body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
+    save();
+    if (!q.type || q.type === 'text') { renderOpts(q); return; }
+    $('media').hidden = false;
+    $('media').innerHTML = '<div class="photo-box loading"><div class="spin" role="status" aria-label="Ładuję zdjęcie"></div></div>';
+    loadPhotos().then(function (ph) {
+      if (CONFIG.questions[state.qi] !== q) return;
+      if (q.type === 'zoom') renderZoom(q, ph.zoom);
+      else if (q.type === 'blur') renderBlur(q, ph.blur);
+      else if (q.type === 'puzzle') renderPuzzle(q, ph.puzzle);
+    }).catch(function () {
+      if (CONFIG.questions[state.qi] !== q) return;
+      renderLock(q);
+    });
+  }
+  function renderLock(q) {
+    $('media').innerHTML =
+      '<form class="lock" id="lockForm">' +
+      '<div class="lock-ico" aria-hidden="true">🔒</div>' +
+      '<p>Zdjęcia są zabezpieczone numerem Twojej karty. Wpisz go, żeby je odblokować.</p>' +
+      '<label for="lockNum" class="sr">Numer z karty</label>' +
+      '<input id="lockNum" type="text" inputmode="numeric" autocomplete="off" placeholder="cyfry spod kodu QR">' +
+      '<button class="btn secondary" type="submit">Odblokuj zdjęcia</button>' +
+      '</form>';
+    $('lockForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var v = $('lockNum').value || '';
+      isRightCard(v).then(function (ok) {
+        if (!ok || !state.key) { $('toast').className = 'toast'; $('toast').textContent = 'Ten numer nie pasuje 🧐'; sfx.bad(); return; }
+        save();
+        renderQ();
+      });
+    });
+  }
+  function renderOpts(q, onRight) {
     var box = $('opts'); box.innerHTML = '';
     q.opts.forEach(function (text, idx) {
       var b = document.createElement('button');
@@ -870,32 +991,175 @@
       var k = document.createElement('span'); k.className = 'k'; k.textContent = 'ABCD'.charAt(idx);
       var t = document.createElement('span'); t.textContent = text;
       b.appendChild(k); b.appendChild(t);
-      b.addEventListener('click', function () { answer(b, idx, q); });
+      b.addEventListener('click', function () { answer(b, idx, q, onRight); });
       box.appendChild(b);
     });
-    var body = $('qbody'); body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
-    save();
   }
-  function answer(btn, idx, q) {
-    if (idx === q.ok) {
+  function isOk(q, idx) { return Array.isArray(q.ok) ? q.ok.indexOf(idx) >= 0 : idx === q.ok; }
+  function praise() { return ['Brawo! 🎉', 'Dokładnie! 😎', 'Tak jest! ⭐', 'Mistrzyni! 🏆', 'No pewnie! 🙌', 'Petarda! 💥', 'Geniusz! 🧠'][state.qi % 7]; }
+  function answer(btn, idx, q, onRight) {
+    if (isOk(q, idx)) {
       btn.classList.add('right');
       $('toast').className = 'toast ok';
-      $('toast').textContent = ['Brawo! 🎉', 'Dokładnie! 😎', 'Tak jest! ⭐', 'Mistrzyni! 🏆', 'No pewnie! 🙌'][state.qi % 5];
+      $('toast').textContent = q.okToast || praise();
       var bs = document.querySelectorAll('#opts .opt');
       for (var i = 0; i < bs.length; i++) bs[i].disabled = true;
       sfx.ok(); buzz(30);
       var r = btn.getBoundingClientRect();
       burst(r.left + r.width / 2, r.top + r.height / 2, 24, 0.35);
-      later(function () {
-        state.qi++;
-        if (state.qi >= CONFIG.questions.length) { startScratch(); } else { renderQ(); }
-      }, 800);
+      if (onRight) { onRight(); return; }
+      later(nextQ, 900);
     } else {
       btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong');
       $('toast').className = 'toast';
-      $('toast').textContent = q.toast;
+      var t = q.toasts ? q.toasts[idx] || q.toast : q.toast;
+      $('toast').textContent = t;
       sfx.bad(); buzz(90);
     }
+  }
+  function nextQ() {
+    state.qi++;
+    if (state.qi >= CONFIG.questions.length) startScratch(); else { renderQ(); window.scrollTo(0, 0); }
+  }
+  function revealDone(q) {
+    $('caption').textContent = q.caption;
+    $('caption').hidden = false;
+    $('nextBtn').hidden = false;
+    later(function () { $('nextBtn').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }, 300);
+  }
+  $('nextBtn').addEventListener('click', function () { sfx.tap(); nextQ(); });
+
+  function renderZoom(q, src) {
+    $('media').innerHTML = '<div class="photo-box"><img id="zImg" alt="Tajemnicze zbliżenie" draggable="false"><span class="lens-badge">🔍 ×' + q.scale + '</span></div>';
+    var img = $('zImg');
+    img.style.objectPosition = q.objPos;
+    img.style.transformOrigin = q.origin;
+    img.style.transform = 'scale(' + q.scale + ')';
+    img.src = src;
+    renderOpts(q, function () {
+      var box = img.parentNode;
+      box.classList.add('revealed');
+      img.style.transform = 'scale(1)';
+      later(function () { sfx.fanfare(); revealDone(q); }, reduceMotion ? 50 : 1300);
+    });
+  }
+
+  function renderBlur(q, src) {
+    $('media').innerHTML = '<div class="photo-box"><img id="bImg" alt="Rozmazane zdjęcie" draggable="false"><span class="lens-badge" id="bBadge">Wyostrzam…</span></div>';
+    var img = $('bImg');
+    img.style.objectPosition = q.objPos;
+    var t0 = Date.now(), dur = q.seconds * 1000;
+    function paint() {
+      var p = Math.min(1, (Date.now() - t0) / dur);
+      var px = q.maxBlur * Math.pow(1 - p, 1.6);
+      img.style.filter = 'blur(' + px.toFixed(1) + 'px)';
+      $('bBadge').textContent = p < 1 ? 'Wyostrzam… ' + Math.round(p * 100) + '%' : 'Ostre!';
+      if (p >= 1) { clearInterval(blurTimer); blurTimer = null; }
+    }
+    img.onload = function () { t0 = Date.now(); paint(); blurTimer = setInterval(paint, 100); };
+    img.style.filter = 'blur(' + q.maxBlur + 'px)';
+    img.src = src;
+    renderOpts(q, function () {
+      var secs = Math.max(1, Math.round((Date.now() - t0) / 1000));
+      clearInterval(blurTimer); blurTimer = null;
+      img.style.transition = 'filter .8s ease';
+      img.style.filter = 'blur(0)';
+      $('bBadge').textContent = secs < q.seconds ? 'Rozpoznane w ' + secs + ' s ⚡' : 'Ostre!';
+      later(function () { sfx.fanfare(); revealDone(q); }, 700);
+    });
+  }
+
+  function renderPuzzle(q, src) {
+    var n = q.size;
+    $('media').innerHTML =
+      '<div class="puzzle" id="pzBoard" style="--n:' + n + '"></div>' +
+      '<div class="pz-bar"><span id="pzMoves">Ruchy: 0</span>' +
+      '<button class="linkish" id="pzPeek" type="button">👁️ Przytrzymaj, żeby podejrzeć</button></div>' +
+      '<button class="linkish" id="pzGiveUp" type="button" hidden>Poddaję się, ułóż za mnie 🏳️</button>';
+    var board = $('pzBoard');
+    pz = { n: n, tiles: [], empty: n * n - 1, moves: 0, done: false, src: src };
+    var order = [];
+    for (var i = 0; i < n * n; i++) order.push(i);
+    var empty = n * n - 1, prev = -1;
+    for (var s = 0; s < 140 || isSolved(order); s++) {
+      var nb = neighbors(empty, n).filter(function (x) { return x !== prev; });
+      var pick = nb[(Math.random() * nb.length) | 0];
+      order[empty] = order[pick]; order[pick] = n * n - 1;
+      prev = empty; empty = pick;
+    }
+    pz.order = order; pz.empty = empty;
+    for (var t = 0; t < n * n; t++) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'tile';
+      el.setAttribute('aria-label', 'Kafelek ' + (t + 1));
+      el.style.backgroundImage = 'url("' + src + '")';
+      el.style.backgroundPosition = ((t % n) / (n - 1) * 100) + '% ' + (Math.floor(t / n) / (n - 1) * 100) + '%';
+      if (t === n * n - 1) el.classList.add('blank');
+      (function (id) { el.addEventListener('click', function () { tapTile(id); }); })(t);
+      board.appendChild(el);
+      pz.tiles.push(el);
+    }
+    var peek = document.createElement('div');
+    peek.className = 'pz-peek'; peek.hidden = true;
+    peek.style.backgroundImage = 'url("' + src + '")';
+    board.appendChild(peek);
+    function showPeek(on) { if (!pz.done) peek.hidden = !on; }
+    var pb = $('pzPeek');
+    pb.addEventListener('pointerdown', function (e) { e.preventDefault(); showPeek(true); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { pb.addEventListener(ev, function () { showPeek(false); }); });
+    pb.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') showPeek(true); });
+    pb.addEventListener('keyup', function () { showPeek(false); });
+    $('pzGiveUp').addEventListener('click', function () {
+      for (var i = 0; i < n * n; i++) pz.order[i] = i;
+      pz.empty = n * n - 1;
+      layout(); solved(true);
+    });
+    later(function () { if (pz && !pz.done) $('pzGiveUp').hidden = false; }, 75000);
+    layout();
+  }
+  function neighbors(pos, n) {
+    var r = Math.floor(pos / n), c = pos % n, out = [];
+    if (r > 0) out.push(pos - n);
+    if (r < n - 1) out.push(pos + n);
+    if (c > 0) out.push(pos - 1);
+    if (c < n - 1) out.push(pos + 1);
+    return out;
+  }
+  function isSolved(order) { for (var i = 0; i < order.length; i++) if (order[i] !== i) return false; return true; }
+  function layout() {
+    var n = pz.n;
+    for (var pos = 0; pos < n * n; pos++) {
+      var el = pz.tiles[pz.order[pos]];
+      el.style.transform = 'translate(' + (pos % n * 100) + '%, ' + (Math.floor(pos / n) * 100) + '%)';
+    }
+  }
+  function tapTile(id) {
+    if (!pz || pz.done) return;
+    var pos = pz.order.indexOf(id);
+    if (neighbors(pos, pz.n).indexOf(pz.empty) < 0) { buzz(15); return; }
+    pz.order[pz.empty] = id; pz.order[pos] = pz.n * pz.n - 1; pz.empty = pos;
+    pz.moves++;
+    $('pzMoves').textContent = 'Ruchy: ' + pz.moves;
+    tone(520 + Math.random() * 120, 0, 0.06, 'triangle', 0.08);
+    layout();
+    if (isSolved(pz.order)) solved(false);
+  }
+  function solved(gaveUp) {
+    if (pz.done) return;
+    pz.done = true;
+    var q = CONFIG.questions[state.qi];
+    later(function () {
+      $('pzBoard').classList.add('solved');
+      $('pzGiveUp').hidden = true;
+      $('pzPeek').hidden = true;
+      $('toast').className = 'toast ok';
+      $('toast').textContent = gaveUp ? 'Wujcio ułożył za Ciebie 😎 Ale się nie liczy!' : 'Ułożone w ' + pz.moves + ' ruchach! 🧩🏆';
+      sfx.fanfare(); buzz([40, 40, 80]);
+      var r = $('pzBoard').getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 90, 0.9);
+      revealDone(q);
+    }, 350);
   }
 
   var foil = $('foil');
@@ -1027,7 +1291,7 @@
     requestAnimationFrame(step);
   }
   $('againBtn').addEventListener('click', function () {
-    state = { stage: 'intro', qi: 0 };
+    state = { stage: 'intro', qi: 0, key: state.key };
     try { localStorage.removeItem(STORE_KEY); } catch (e) {}
     $('manualNum').value = ''; $('manualBox').hidden = true;
     show('intro');
@@ -1096,6 +1360,7 @@
   function start(data) {
     var saved = (data && data.stage) ? data : load();
     var h = (location.hash || '').slice(1).toLowerCase();
+    if (saved.key) state.key = saved.key;
     if (HASH[h]) saved = { stage: HASH[h], qi: 0 };
     goto(STAGES.indexOf(saved.stage) >= 0 ? saved.stage : 'intro', saved.qi);
   }
