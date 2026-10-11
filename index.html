@@ -216,6 +216,17 @@
   .pz-bar .linkish { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
+  .video-box { position: relative; width: 100%; max-width: 340px; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 18px; overflow: hidden; background: #000; }
+  .video-box video { width: 100%; height: 100%; max-width: 100%; object-fit: cover; object-position: 50% 65%; display: block; }
+  .video-box video[controls] { object-fit: contain; }
+  .vid-ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 16px; color: #fff; background: rgba(20, 8, 24, .45); font-weight: 800; text-shadow: 0 2px 8px rgba(0, 0, 0, .6); }
+  .vid-ov.stop { background: rgba(20, 8, 24, .55); }
+  .vid-ov.stop b { font-family: var(--font-display); font-size: 2.2rem; line-height: 1; color: var(--gold-hi); animation: pop .4s cubic-bezier(.2, 1.5, .4, 1) both; }
+  .vid-ov span { font-size: 1.05rem; max-width: 24ch; text-wrap: balance; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+  .vid-play { width: 76px; height: 76px; border-radius: 50%; border: 0; cursor: pointer; font-size: 2rem; padding-left: 6px; color: var(--accent-ink); background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px rgba(0, 0, 0, .4); }
+  .vid-play:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
   .ticket {
     position: relative; border-radius: 18px; padding: 16px 16px 14px;
     background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, var(--surface)), color-mix(in srgb, var(--gold-hi) 22%, var(--surface)));
@@ -411,6 +422,7 @@
     finaleMsg: '{name}, wszystkiego najlepszego na 15. urodziny! Leć do Sfery i szalej, bo dziś Ci wszystko wolno 🛍️✨ Buziaki!',
     futureNote: 'Saldo karty sprawdzisz zawsze na finpay.pl/stansrodkow',
     scratchGoal: 0.55,
+    video: 'video/dziadek-okon.mp4',
     questions: [
       { q: 'Rozgrzewka! Co jest NAJLEPSZE w urodzinach?',
         opts: ['Tort 🎂', 'Prezenty! 🎁', 'Życzenia od cioć przez telefon 📞', 'Sprzątanie po imprezie 🧹'], ok: 1,
@@ -431,6 +443,19 @@
         toasts: ['Mały rycerz? Ten nie jest taki mały 😄', 'Zorro nosi maskę, a ten czapkę z daszkiem 🧢', '', 'Miecz świetlny jakiś taki… stalowy 🤔'],
         okToast: 'Tak! To dziadek w pełnej gotowości bojowej ⚔️',
         caption: 'Dziadek w trybie bojowym. Niewierni drżą ze strachu, a krety na wszelki wypadek też 🗡️🌳' },
+      { type: 'video', q: 'Dziadek wraca! 🎣 Łowi ryby… w swoim basenie. Oglądaj!',
+        play: [2.5, 6.05], stopText: 'Co dziadek zaraz wyciągnie z basenu?',
+        reveal: [6.05, 16],
+        opts: ['Stary kalosz 👢', 'Okonia 🐟', 'Klapek babci 🩴', 'Nic, to przecież basen 🏊'], ok: 1,
+        toasts: ['Kalosz był w zeszłym tygodniu 😄', '', 'Babcia ma oba klapki, sprawdzaliśmy 🩴', 'Ha! Dziadek nie zna słowa „niemożliwe” 😎'],
+        okToast: 'OKOŃ! W BASENIE! 🐟🤯',
+        caption: 'Wędkarstwo przydomowe, poziom: dziadek. Basen 1, okoń 0 🎣' },
+      { type: 'video', q: 'A co w tym czasie robi babcia? 👵',
+        poster: 16, reveal: [0, 2.4],
+        opts: ['Kibicuje i bije brawo 👏', 'Dzwoni po straż rybacką 🚓', 'Siedzi w telefonie 📱', 'Rozgrzewa patelnię 🍳'], ok: 2,
+        toasts: ['Brawo? Jakie brawo? 😂', 'Straż rybacka by się zdziwiła 🚓', '', 'Patelnia może później 🍳'],
+        okToast: 'No pewnie! 📱😂',
+        caption: 'Dziadek łowi okonia stulecia, a babcia: „aha, fajnie” i scrolluje dalej 📱😂' },
       { q: 'Ile świeczek dziś na torcie?',
         opts: ['14 🕯️', '15 🎂', '16 🙃', 'Tyle, że trzeba wezwać straż pożarną 🚒'], ok: 1,
         toasts: ['Rok temu! Coś Ci uciekło 😄', '', 'Spokojnie, nie przyspieszaj 😅', 'Haha, prawie… ale dokładnie ile? 🚒'] },
@@ -916,6 +941,7 @@
     renderQ();
   }
   function clearRound() {
+    stopVideo();
     clearInterval(blurTimer); blurTimer = null;
     pz = null;
     $('media').innerHTML = ''; $('media').hidden = true;
@@ -938,6 +964,7 @@
     var body = $('qbody'); body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
     save();
     if (!q.type || q.type === 'text') { renderOpts(q); return; }
+    if (q.type === 'video') { $('media').hidden = false; renderVideo(q); return; }
     $('media').hidden = false;
     $('media').innerHTML = '<div class="photo-box loading"><div class="spin" role="status" aria-label="Ładuję zdjęcie"></div></div>';
     loadPhotos().then(function (ph) {
@@ -996,6 +1023,67 @@
     later(function () { $('nextBtn').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }, 300);
   }
   $('nextBtn').addEventListener('click', function () { sfx.tap(); nextQ(); });
+
+  var vidLoop = null;
+  function stopVideo() {
+    if (vidLoop) { cancelAnimationFrame(vidLoop); vidLoop = null; }
+    var v = $('vid');
+    if (v) { try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {} }
+  }
+  function playSegment(v, from, to, done) {
+    if (vidLoop) { cancelAnimationFrame(vidLoop); vidLoop = null; }
+    v.muted = !soundOn;
+    v.currentTime = from;
+    var p = v.play();
+    if (p && p.catch) p.catch(function () { v.muted = true; v.play().catch(function () {}); });
+    function tick() {
+      if (v.currentTime >= to || v.ended) { v.pause(); vidLoop = null; if (done) done(); return; }
+      vidLoop = requestAnimationFrame(tick);
+    }
+    vidLoop = requestAnimationFrame(tick);
+  }
+  function renderVideo(q) {
+    $('media').innerHTML =
+      '<div class="video-box">' +
+      '<video id="vid" playsinline preload="auto" src="' + CONFIG.video + '#t=' + (q.play ? q.play[0] : q.poster) + '"></video>' +
+      '<div class="vid-ov" id="vidOv"></div>' +
+      '</div>';
+    var v = $('vid'), ov = $('vidOv');
+    function overlay(html, tone) { ov.innerHTML = html; ov.className = 'vid-ov' + (tone ? ' ' + tone : ''); ov.hidden = !html; }
+    function onRight() {
+      overlay('');
+      playSegment(v, q.reveal[0], q.reveal[1], function () {
+        sfx.fanfare();
+        revealDone(q);
+        $('media').insertAdjacentHTML('beforeend', '<button class="linkish" id="vidFull" type="button">▶ Obejrzyj cały filmik</button>');
+        $('vidFull').addEventListener('click', function () {
+          if (vidLoop) { cancelAnimationFrame(vidLoop); vidLoop = null; }
+          v.controls = true; v.muted = !soundOn; v.currentTime = 0;
+          v.play().catch(function () {});
+          $('vidFull').hidden = true;
+        });
+      });
+    }
+    if (q.play) {
+      v.addEventListener('loadeddata', function () { if (v.currentTime < q.play[0]) v.currentTime = q.play[0]; }, { once: true });
+      overlay('<button class="vid-play" id="vidPlay" type="button" aria-label="Odtwórz">▶</button><span>Stuknij i patrz uważnie 👀</span>');
+      $('vidPlay').addEventListener('click', function () {
+        sfx.tap();
+        overlay('');
+        playSegment(v, q.play[0], q.play[1], function () {
+          overlay('<b>⏸ STOP!</b><span>' + q.stopText + '</span>', 'stop');
+          buzz([30, 30, 30]);
+          sfx.scan();
+          renderOpts(q, onRight);
+          later(function () { $('opts').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); }, 250);
+        });
+      });
+    } else {
+      v.addEventListener('loadeddata', function () { v.currentTime = q.poster; }, { once: true });
+      overlay('');
+      renderOpts(q, onRight);
+    }
+  }
 
   function renderZoom(q, src) {
     $('media').innerHTML = '<div class="photo-box"><img id="zImg" alt="Tajemnicze zbliżenie" draggable="false"><span class="lens-badge">🔍 ×' + q.scale + '</span></div>';
