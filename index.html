@@ -214,10 +214,6 @@
   .pz-peek { position: absolute; inset: 0; background-size: cover; z-index: 3; }
   .pz-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 800; font-size: .88rem; color: var(--muted); font-variant-numeric: tabular-nums; }
   .pz-bar .linkish { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-  .lock { display: flex; flex-direction: column; gap: 10px; text-align: center; padding: 16px; border-radius: 18px; border: 2px dashed var(--line); }
-  .lock p { margin: 0; color: var(--muted); }
-  .lock-ico { font-size: 2.4rem; }
-  .lock input { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; text-align: center; border: 2px solid var(--line); border-radius: 14px; padding: 10px; background: var(--surface); color: var(--fg); width: 100%; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
   .ticket {
@@ -390,6 +386,7 @@
       <p id="fMsg"></p>
       <p class="sign">wujcio 🤠</p>
     </div>
+    <button class="btn secondary" id="songBtn" type="button">🎵 Zagraj „Sto lat” jeszcze raz</button>
     <a class="btn" id="futureLink" target="_blank" rel="noopener">💳 Sprawdź saldo karty ↗</a>
     <p class="note split" id="futureNote"></p>
     <button class="linkish" id="againBtn" type="button">Przejdź wszystko jeszcze raz</button>
@@ -430,10 +427,10 @@
         okToast: 'Każda odpowiedź dobra, bo każda to wujcio 🤠' },
       { type: 'blur', q: 'Kto to? Zdjęcie się wyostrza, zgaduj jak najszybciej! 🧐',
         maxBlur: 26, seconds: 15, objPos: '45% 50%',
-        opts: ['Pan Wołodyjowski na emeryturze ⚔️', 'Zorro z rodzinnych ogródków 🦊', 'Dziadek, postrach kretów 🗡️', 'Jedi z Castoramy ✨'], ok: 2,
+        opts: ['Pan Wołodyjowski na emeryturze ⚔️', 'Zorro z rodzinnych ogródków 🦊', 'Dziadek, postrach niewiernych 🗡️', 'Jedi z Castoramy ✨'], ok: 2,
         toasts: ['Mały rycerz? Ten nie jest taki mały 😄', 'Zorro nosi maskę, a ten czapkę z daszkiem 🧢', '', 'Miecz świetlny jakiś taki… stalowy 🤔'],
         okToast: 'Tak! To dziadek w pełnej gotowości bojowej ⚔️',
-        caption: 'Dziadek w trybie bojowym. Krety, mszyce i niewierni drżą ze strachu 🗡️🌳' },
+        caption: 'Dziadek w trybie bojowym. Niewierni drżą ze strachu, a krety na wszelki wypadek też 🗡️🌳' },
       { q: 'Ile świeczek dziś na torcie?',
         opts: ['14 🕯️', '15 🎂', '16 🙃', 'Tyle, że trzeba wezwać straż pożarną 🚒'], ok: 1,
         toasts: ['Rok temu! Coś Ci uciekło 😄', '', 'Spokojnie, nie przyspieszaj 😅', 'Haha, prawie… ale dokładnie ile? 🚒'] },
@@ -449,7 +446,7 @@
   var STAGES = ['intro', 'scan', 'quiz', 'scratch', 'finale'];
   var $ = function (id) { return document.getElementById(id); };
   var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  var state = { stage: 'intro', qi: 0, key: '' };
+  var state = { stage: 'intro', qi: 0 };
   var timers = [];
 
   function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
@@ -477,7 +474,7 @@
     soundOn = !soundOn;
     try { localStorage.setItem(STORE_KEY + '-sound', soundOn ? 'on' : 'off'); } catch (e) {}
     paintSound();
-    if (soundOn) sfx.ok();
+    if (soundOn) sfx.ok(); else if (typeof stopSong === 'function') stopSong();
   });
 
   var AC = null;
@@ -521,6 +518,7 @@
   function show(stage) {
     clearTimers();
     if (stage !== 'scan') stopCamera();
+    if (stage !== 'finale') stopSong();
     state.stage = stage;
     for (var k in panels) {
       var on = k === stage;
@@ -856,12 +854,9 @@
     if (/finpay\.pl\/stansrodkow/i.test(v)) return Promise.resolve(true);
     var digits = v.replace(/\D/g, ''), L = CONFIG.cardLen, jobs = [];
     if (!window.crypto || !crypto.subtle) return Promise.resolve(false);
-    var wins = [];
-    for (var i = 0; i + L <= digits.length; i++) { wins.push(digits.substr(i, L)); jobs.push(sha256(digits.substr(i, L))); }
+    for (var i = 0; i + L <= digits.length; i++) jobs.push(sha256(digits.substr(i, L)));
     return Promise.all(jobs).then(function (hs) {
-      var at = hs.indexOf(CONFIG.cardHash);
-      if (at !== -1) { state.key = wins[at]; save(); }
-      return at !== -1;
+      return hs.indexOf(CONFIG.cardHash) !== -1;
     });
   }
   function cardAccepted() {
@@ -899,27 +894,18 @@
   var photos = null, photosJob = null, blurTimer = null;
   var pz = null;
 
-  function deriveKey(digits, salt) {
-    return crypto.subtle.importKey('raw', new TextEncoder().encode(digits), 'PBKDF2', false, ['deriveKey']).then(function (base) {
-      return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 250000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-    });
-  }
   function loadPhotos() {
     if (photos) return Promise.resolve(photos);
-    if (!state.key) return Promise.reject(new Error('no_key'));
     if (photosJob) return photosJob;
-    photosJob = fetch('zdjecia.bin', { cache: 'force-cache' }).then(function (r) {
-      if (!r.ok) throw new Error('fetch');
-      return r.arrayBuffer();
-    }).then(function (buf) {
-      var all = new Uint8Array(buf);
-      return deriveKey(state.key, all.slice(0, 16)).then(function (key) {
-        return crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(16, 28) }, key, all.slice(28));
+    var files = { zoom: 'img/zoom.jpg', blur: 'img/blur.jpg', puzzle: 'img/puzzle.jpg' };
+    photosJob = Promise.all(Object.keys(files).map(function (k) {
+      return new Promise(function (res, rej) {
+        var im = new Image();
+        im.onload = function () { res(); };
+        im.onerror = rej;
+        im.src = files[k];
       });
-    }).then(function (plain) {
-      photos = JSON.parse(new TextDecoder().decode(plain));
-      return photos;
-    }).catch(function (e) { photosJob = null; throw e; });
+    })).then(function () { photos = files; return photos; }).catch(function (e) { photosJob = null; throw e; });
     return photosJob;
   }
 
@@ -961,26 +947,8 @@
       else if (q.type === 'puzzle') renderPuzzle(q, ph.puzzle);
     }).catch(function () {
       if (CONFIG.questions[state.qi] !== q) return;
-      renderLock(q);
-    });
-  }
-  function renderLock(q) {
-    $('media').innerHTML =
-      '<form class="lock" id="lockForm">' +
-      '<div class="lock-ico" aria-hidden="true">🔒</div>' +
-      '<p>Zdjęcia są zabezpieczone numerem Twojej karty. Wpisz go, żeby je odblokować.</p>' +
-      '<label for="lockNum" class="sr">Numer z karty</label>' +
-      '<input id="lockNum" type="text" inputmode="numeric" autocomplete="off" placeholder="cyfry spod kodu QR">' +
-      '<button class="btn secondary" type="submit">Odblokuj zdjęcia</button>' +
-      '</form>';
-    $('lockForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var v = $('lockNum').value || '';
-      isRightCard(v).then(function (ok) {
-        if (!ok || !state.key) { $('toast').className = 'toast'; $('toast').textContent = 'Ten numer nie pasuje 🧐'; sfx.bad(); return; }
-        save();
-        renderQ();
-      });
+      $('media').innerHTML = '<p class="hint">Nie udało się wczytać zdjęcia. Sprawdź internet i odśwież stronę.</p>';
+      renderOpts(q);
     });
   }
   function renderOpts(q, onRight) {
@@ -1266,15 +1234,90 @@
   }
   $('revealBtn').addEventListener('click', finishScratch);
   $('claimBtn').addEventListener('click', runFinale);
+  var song = { gain: null, timer: null, playing: false };
+  function midi(name) {
+    var m = /^([A-G])(#?)(\d)$/.exec(name);
+    var base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0);
+    return 440 * Math.pow(2, (base + 12 * (+m[3] + 1) - 69) / 12);
+  }
+  function voice(a, dest, freq, at, dur, type, vol) {
+    var o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(vol, at + 0.02);
+    g.gain.exponentialRampToValueAtTime(vol * 0.55, at + Math.min(0.25, dur * 0.5));
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g); g.connect(dest); o.start(at); o.stop(at + dur + 0.05);
+  }
+  var STO_LAT = [
+    ['G4', 1], ['E4', 1], ['G4', 1], ['E4', 1],
+    ['G4', 1], ['A4', .5], ['G4', .5], ['F4', .5], ['E4', .5], ['F4', 1],
+    ['F4', 1], ['D4', 1], ['F4', 1], ['D4', 1],
+    ['F4', 1], ['G4', .5], ['F4', .5], ['E4', .5], ['D4', .5], ['E4', 1],
+    ['G4', .5], ['G4', .5], ['E4', 1], ['G4', .5], ['G4', .5], ['E4', 1],
+    ['G4', 1], ['C5', .5], ['B4', .5], ['A4', .5], ['G#4', .5], ['A4', 2],
+    ['B4', 2], ['B4', 1], ['B4', 1],
+    ['C5', 5]
+  ];
+  var CHORDS = {
+    C: ['C3', ['E3', 'G3', 'C4']], G7: ['G2', ['B2', 'D3', 'F3']],
+    E7: ['E2', ['G#2', 'B2', 'D3']], Am: ['A2', ['C3', 'E3', 'A3']]
+  };
+  var HARMONY = [
+    ['C', 2], ['C', 2], ['C', 2], ['G7', 2], ['G7', 2], ['G7', 2], ['G7', 2], ['C', 2],
+    ['C', 2], ['C', 2], ['C', 1], ['E7', 2], ['Am', 2], ['G7', 2], ['G7', 2], ['C', 5]
+  ];
+  function stopSong() {
+    clearTimeout(song.timer);
+    if (song.gain) {
+      try { song.gain.gain.cancelScheduledValues(0); song.gain.gain.value = 0; song.gain.disconnect(); } catch (e) {}
+    }
+    song.gain = null; song.playing = false;
+    paintSongBtn();
+  }
+  function paintSongBtn() {
+    var b = $('songBtn'); if (!b) return;
+    b.textContent = song.playing ? '⏹ Zatrzymaj „Sto lat”' : '🎵 Zagraj „Sto lat” jeszcze raz';
+  }
+  function playStoLat() {
+    stopSong();
+    var a = audio(); if (!a) return;
+    var out = a.createGain(); out.gain.value = 1; out.connect(a.destination);
+    song.gain = out; song.playing = true; paintSongBtn();
+    var Q = 0.44, t0 = a.currentTime + 0.12, t = t0;
+    STO_LAT.forEach(function (n) {
+      var d = n[1] * Q;
+      voice(a, out, midi(n[0]), t, d * 0.95, 'triangle', 0.2);
+      voice(a, out, midi(n[0]) * 2, t, Math.min(d, 0.5), 'sine', 0.035);
+      t += d;
+    });
+    var h = t0;
+    HARMONY.forEach(function (seg) {
+      var c = CHORDS[seg[0]], beats = seg[1];
+      voice(a, out, midi(c[0]), h, Math.min(beats, 1) * Q * 0.9, 'sine', 0.16);
+      if (beats >= 2) c[1].forEach(function (f) { voice(a, out, midi(f), h + Q, (beats > 2 ? beats - 1 : 0.5) * Q, 'triangle', 0.035); });
+      h += beats * Q;
+    });
+    var total = (t - t0) * 1000;
+    song.timer = setTimeout(function () {
+      song.playing = false; paintSongBtn();
+      if (state.stage === 'finale') burst(innerWidth / 2, innerHeight * 0.35, 120, 1);
+    }, total - 600);
+  }
+  $('songBtn').addEventListener('click', function () {
+    if (song.playing) { stopSong(); return; }
+    if (!soundOn) { soundOn = true; try { localStorage.setItem(STORE_KEY + '-sound', 'on'); } catch (e) {} paintSound(); }
+    playStoLat();
+  });
 
   function runFinale() {
     show('finale');
     $('fMsg').textContent = CONFIG.finaleMsg.replace('{name}', CONFIG.nameVocative);
     var el = $('fAmount');
-    if (reduceMotion) { el.textContent = fmt(CONFIG.balance); return; }
+    if (reduceMotion) { el.textContent = fmt(CONFIG.balance); later(playStoLat, 400); return; }
     el.textContent = '0';
     later(function () {
-      sfx.fanfare();
+      playStoLat();
       countUp(el, CONFIG.balance, 1200);
       burst(innerWidth / 2, innerHeight * 0.3, 150, 1.1);
     }, 500);
@@ -1291,7 +1334,8 @@
     requestAnimationFrame(step);
   }
   $('againBtn').addEventListener('click', function () {
-    state = { stage: 'intro', qi: 0, key: state.key };
+    stopSong();
+    state = { stage: 'intro', qi: 0 };
     try { localStorage.removeItem(STORE_KEY); } catch (e) {}
     $('manualNum').value = ''; $('manualBox').hidden = true;
     show('intro');
@@ -1360,7 +1404,6 @@
   function start(data) {
     var saved = (data && data.stage) ? data : load();
     var h = (location.hash || '').slice(1).toLowerCase();
-    if (saved.key) state.key = saved.key;
     if (HASH[h]) saved = { stage: HASH[h], qi: 0 };
     goto(STAGES.indexOf(saved.stage) >= 0 ? saved.stage : 'intro', saved.qi);
   }
