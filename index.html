@@ -128,10 +128,14 @@
   .vf video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .vf[data-state="live"] .laser { opacity: 1; animation-duration: 1.6s; }
   .torch { position: absolute; right: 18px; bottom: 18px; z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 0; font-size: 1.2rem; cursor: pointer; background: color-mix(in srgb, var(--surface) 85%, transparent); box-shadow: var(--shadow); }
+  .torch.lens { right: auto; left: 18px; }
+  .focus-ring { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border: 3px solid var(--gold-hi); border-radius: 50%; z-index: 3; pointer-events: none; }
+  .focus-ring.pulse { animation: ring .9s ease-out forwards; }
+  @keyframes ring { from { transform: scale(1.5); opacity: 1; } to { transform: scale(.8); opacity: 0; } }
   .torch[aria-pressed="true"] { background: var(--gold-hi); }
   .torch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .alts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; }
-  .vf-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .vf-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .vf-overlay polygon { fill: color-mix(in srgb, var(--ok) 22%, transparent); stroke: var(--ok); stroke-linejoin: round; stroke-dasharray: 4000; stroke-dashoffset: 4000; animation: draw .7s ease-out forwards; }
   .vf[data-state="wrong"] .vf-overlay polygon { fill: color-mix(in srgb, var(--warn) 22%, transparent); stroke: var(--warn); }
   @keyframes draw { to { stroke-dashoffset: 0; } }
@@ -139,11 +143,11 @@
   .vf-idle svg { width: 42%; height: 42%; opacity: .85; }
   .vf[data-state="ok"] .vf-idle { color: var(--ok); }
   .vf[data-state="fail"] img { filter: grayscale(.7) brightness(.8); }
-  .laser { position: absolute; left: 8%; right: 8%; height: 3px; top: 10%; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--accent) 60%, transparent); opacity: .55; animation: sweep 2.4s ease-in-out infinite alternate; }
+  .laser { pointer-events: none; position: absolute; left: 8%; right: 8%; height: 3px; top: 10%; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--accent) 60%, transparent); opacity: .55; animation: sweep 2.4s ease-in-out infinite alternate; }
   .vf[data-state="scanning"] .laser { opacity: 1; animation-duration: .8s; }
   .vf[data-state="ok"] .laser, .vf[data-state="wrong"] .laser, .vf[data-state="fail"] .laser { display: none; }
   @keyframes sweep { from { top: 10%; } to { top: 88%; } }
-  .corner { position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 2; transition: border-color .3s; }
+  .corner { pointer-events: none; position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 2; transition: border-color .3s; }
   .vf[data-state="ok"] .corner { border-color: var(--ok); }
   .vf[data-state="wrong"] .corner, .vf[data-state="fail"] .corner { border-color: var(--warn); }
   .corner.tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 12px; }
@@ -299,12 +303,14 @@
       <svg class="vf-overlay" id="vfOverlay" preserveAspectRatio="xMidYMid slice" aria-hidden="true" hidden><polygon id="vfPoly" points=""/></svg>
       <span class="laser" aria-hidden="true"></span>
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <span class="focus-ring" id="focusRing" aria-hidden="true" hidden></span>
       <button class="torch" id="torchBtn" type="button" aria-pressed="false" aria-label="Latarka" hidden>🔦</button>
+      <button class="torch lens" id="lensBtn" type="button" aria-label="Zmień obiektyw" hidden>🔄</button>
     </div>
     <p class="status" id="scanStatus" role="status"></p>
     <button class="btn" id="camBtn" type="button">📷 Włącz aparat</button>
     <input type="file" id="file" accept="image/*" capture="environment">
-    <p class="hint" id="scanHint">Telefon zapyta o dostęp do aparatu. Pozwól, wyceluj w kod QR na karcie, a apka złapie go sama.</p>
+    <p class="hint" id="scanHint">Pozwól na aparat i trzymaj kartę ok. 20 cm od telefonu. Obraz rozmyty? Stuknij w kod albo zmień obiektyw 🔄.</p>
     <div class="alts">
       <button class="linkish" id="photoBtn" type="button">Zrób zdjęcie zamiast tego</button>
       <button class="linkish" id="manualToggle" type="button">Wpisz numer z karty</button>
@@ -532,6 +538,7 @@
     $('vfImg').hidden = true; $('vfImg').removeAttribute('src');
     $('vfOverlay').hidden = true;
     $('torchBtn').hidden = true;
+    $('lensBtn').hidden = true;
     setStatus('', '');
     $('camBtn').textContent = '📷 Włącz aparat';
     $('camBtn').hidden = false;
@@ -539,7 +546,30 @@
   function setVF(s) { $('vf').setAttribute('data-state', s); }
   function setStatus(text, tone) { $('scanStatus').textContent = text; $('scanStatus').className = 'status ' + (tone || ''); }
 
-  function startCamera() {
+  var CAM_KEY = STORE_KEY + '-cam';
+  function savedCam() { try { return localStorage.getItem(CAM_KEY) || ''; } catch (e) { return ''; } }
+  function rememberCam(id) { try { if (id) localStorage.setItem(CAM_KEY, id); else localStorage.removeItem(CAM_KEY); } catch (e) {} }
+  function camConstraints(deviceId) {
+    var v = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+    if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = { ideal: 'environment' };
+    return { audio: false, video: v };
+  }
+  function listBackCams() {
+    if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve([]);
+    return navigator.mediaDevices.enumerateDevices().then(function (all) {
+      var vids = all.filter(function (d) { return d.kind === 'videoinput' && d.deviceId; });
+      var backs = vids.filter(function (d) { return /back|rear|environment|tyln|tył/i.test(d.label); });
+      if (!backs.length) backs = vids.filter(function (d) { return !/front|user|przedni/i.test(d.label); });
+      return backs;
+    }).catch(function () { return []; });
+  }
+  function pickMain(list) {
+    for (var i = 0; i < list.length; i++) if (/camera2 0\b|camera 0\b/i.test(list[i].label)) return list[i];
+    return list[0] || null;
+  }
+  function switchTo(id) { rememberCam(id); stopCamera(); startCamera(id); }
+
+  function startCamera(deviceId) {
     if (cam.stream) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('Ta przeglądarka nie daje dostępu do aparatu. Zrób zdjęcie kodu albo wpisz numer.', 'bad');
@@ -548,9 +578,10 @@
     $('camBtn').hidden = true;
     $('vfOverlay').hidden = true;
     setStatus('Włączam aparat…', 'busy');
-    navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    var want = deviceId || savedCam();
+    navigator.mediaDevices.getUserMedia(camConstraints(want)).catch(function (e) {
+      if (want && !(e && e.name === 'NotAllowedError')) { rememberCam(''); want = ''; return navigator.mediaDevices.getUserMedia(camConstraints('')); }
+      throw e;
     }).then(function (stream) {
       if (state.stage !== 'scan') { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
       cam.stream = stream;
@@ -562,17 +593,51 @@
       var p = video.play(); if (p && p.catch) p.catch(function () {});
       setVF('live');
       setStatus('Wyceluj w kod QR na karcie 🎯', 'busy');
-      try {
-        var caps = cam.track.getCapabilities && cam.track.getCapabilities();
-        if (caps && caps.torch) $('torchBtn').hidden = false;
-      } catch (e) {}
-      prepareDetector().then(function () { cam.running = true; loop(); });
+      return listBackCams().then(function (backs) {
+        if (!cam.stream) return;
+        cam.backs = backs;
+        $('lensBtn').hidden = backs.length < 2;
+        var cur = '';
+        try { cur = cam.track.getSettings().deviceId || ''; } catch (e) {}
+        if (!want) {
+          var main = pickMain(backs);
+          if (main && cur && main.deviceId !== cur) { switchTo(main.deviceId); return; }
+        }
+        tuneCamera();
+        return prepareDetector().then(function () { cam.running = true; loop(); });
+      });
     }).catch(function (e) {
       $('camBtn').hidden = false;
       $('camBtn').textContent = '📷 Spróbuj włączyć aparat';
       setStatus(e && e.name === 'NotAllowedError'
         ? 'Brak zgody na aparat. Stuknij 🔒 obok adresu strony, zezwól na aparat i spróbuj jeszcze raz.'
         : 'Nie udało się włączyć aparatu. Zrób zdjęcie kodu albo wpisz numer z karty.', 'bad');
+    });
+  }
+  function camCaps() { try { return (cam.track && cam.track.getCapabilities && cam.track.getCapabilities()) || {}; } catch (e) { return {}; } }
+  function tuneCamera() {
+    var caps = camCaps(), adv = {};
+    if (caps.torch) $('torchBtn').hidden = false;
+    if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) adv.focusMode = 'continuous';
+    if (caps.zoom && caps.zoom.max >= 1.5) adv.zoom = Math.min(caps.zoom.max, 2);
+    if (Object.keys(adv).length) cam.track.applyConstraints({ advanced: [adv] }).catch(function () {});
+  }
+  function tapFocus(e) {
+    if (!cam.track) return;
+    var r = video.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    var ring = $('focusRing');
+    ring.style.left = (x * 100) + '%'; ring.style.top = (y * 100) + '%';
+    ring.hidden = false; ring.classList.remove('pulse'); void ring.offsetWidth; ring.classList.add('pulse');
+    setTimeout(function () { ring.hidden = true; }, 900);
+    var caps = camCaps(), modes = caps.focusMode || [];
+    var shot = {};
+    if (modes.indexOf('single-shot') >= 0) shot.focusMode = 'single-shot';
+    if ('pointsOfInterest' in caps || modes.length) shot.pointsOfInterest = [{ x: x, y: y }];
+    cam.track.applyConstraints({ advanced: [shot] }).catch(function () {}).then(function () {
+      if (modes.indexOf('continuous') >= 0) setTimeout(function () {
+        if (cam.track) cam.track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(function () {});
+      }, 1500);
     });
   }
   function prepareDetector() {
@@ -611,7 +676,7 @@
   function jsqrFrame() {
     if (typeof jsQR !== 'function') return null;
     var vw = video.videoWidth, vh = video.videoHeight;
-    var s = Math.min(1, 720 / Math.max(vw, vh));
+    var s = Math.min(1, 1000 / Math.max(vw, vh));
     var w = Math.round(vw * s), h = Math.round(vh * s);
     work.width = w; work.height = h;
     wctx.drawImage(video, 0, 0, w, h);
@@ -650,6 +715,16 @@
     $('torchBtn').setAttribute('aria-pressed', String(cam.torch));
     cam.track.applyConstraints({ advanced: [{ torch: cam.torch }] }).catch(function () {});
   });
+  $('lensBtn').addEventListener('click', function () {
+    var list = cam.backs || [];
+    if (list.length < 2 || !cam.track) return;
+    var cur = '';
+    try { cur = cam.track.getSettings().deviceId || ''; } catch (e) {}
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) if (list[i].deviceId === cur) idx = i;
+    switchTo(list[(idx + 1) % list.length].deviceId);
+  });
+  video.addEventListener('click', tapFocus);
   $('photoBtn').addEventListener('click', function () { stopCamera(); fileInput.value = ''; fileInput.click(); });
   document.addEventListener('visibilitychange', function () {
     if (state.stage !== 'scan') return;
@@ -749,6 +824,7 @@
     setStatus('✓ Jest! To Twoja karta', 'ok');
     $('camBtn').hidden = true;
     $('torchBtn').hidden = true;
+    $('lensBtn').hidden = true;
     sfx.scan(); buzz([40, 30, 40]);
     later(startQuiz, 1500);
   }
