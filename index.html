@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#d81b6a">
+<title>Urodzinowa Niespodzianka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+  [hidden] { display: none !important; }
+  img { max-width: 100%; }
+  :root {
+    --bg: #fff4f7;
+    --bg-2: #ffdcea;
+    --surface: #ffffff;
+    --fg: #2b1430;
+    --muted: #86688c;
+    --line: #f3cfe0;
+    --accent: #d81b6a;
+    --accent-2: #a3124f;
+    --accent-ink: #ffffff;
+    --gold: #a86f00;
+    --gold-hi: #ffd56b;
+    --ok: #13834c;
+    --warn: #c2410c;
+    --shadow: 0 14px 40px rgba(120, 20, 70, .16);
+    --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Nunito", system-ui, -apple-system, sans-serif;
+    --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #170c1b; --bg-2: #3a1540; --surface: #25132b; --fg: #fbeef5; --muted: #c3a6c9;
+      --line: #46284e; --accent: #ff5c9d; --accent-2: #d93a7c; --accent-ink: #1d0a14;
+      --gold: #ffcf5a; --gold-hi: #ffd56b; --ok: #3ddc84; --warn: #ffa66b;
+      --shadow: 0 14px 40px rgba(0, 0, 0, .5); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #170c1b; --bg-2: #3a1540; --surface: #25132b; --fg: #fbeef5; --muted: #c3a6c9;
+    --line: #46284e; --accent: #ff5c9d; --accent-2: #d93a7c; --accent-ink: #1d0a14;
+    --gold: #ffcf5a; --gold-hi: #ffd56b; --ok: #3ddc84; --warn: #ffa66b;
+    --shadow: 0 14px 40px rgba(0, 0, 0, .5); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 420px at 50% -8%, var(--bg-2), transparent 65%),
+      radial-gradient(circle at 12% 30%, color-mix(in srgb, var(--accent) 14%, transparent) 0 3px, transparent 4px) 0 0 / 46px 46px,
+      var(--bg);
+    color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 500px; margin: 0 auto;
+    padding-inline: 18px; padding-block: 22px 32px;
+    display: flex; flex-direction: column; gap: 18px; min-height: 100vh;
+  }
+
+  .head { text-align: center; display: flex; flex-direction: column; gap: 4px; padding-inline: 40px; }
+  .eyebrow { font-weight: 800; text-transform: uppercase; letter-spacing: .16em; font-size: .72rem; color: var(--accent); }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem, 8vw, 2.5rem); line-height: 1.02; margin: 0; text-wrap: balance; }
+  h1 .hl { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--accent) 45%, transparent) 60% 92%, transparent 92%); padding-inline: 2px; }
+  .sub { color: var(--muted); font-size: 1rem; max-width: 36ch; margin: 2px auto 0; text-wrap: balance; }
+
+  .sound {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); right: 12px; z-index: 60;
+    width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--line);
+    background: var(--surface); color: var(--fg); font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .sound:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; position: relative; }
+  .steps li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .74rem; font-weight: 800; color: var(--muted); position: relative; }
+  .steps li::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 3px; background: var(--line); z-index: 0; border-radius: 3px; }
+  .steps li:first-child::before { display: none; }
+  .steps li.done::before, .steps li.now::before { background: var(--accent); }
+  .steps .n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 3px solid var(--line); font-family: var(--font-display); font-size: .95rem; position: relative; z-index: 1; transition: transform .25s, background .25s; }
+  .steps li.done .n { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .steps li.now .n { border-color: var(--accent); color: var(--accent); transform: scale(1.15); }
+  .steps li.now { color: var(--fg); }
+
+  .panel { background: var(--surface); border-radius: 26px; box-shadow: var(--shadow); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .panel.enter { animation: enter .45s cubic-bezier(.2, .9, .3, 1.15) both; }
+  @keyframes enter { from { opacity: .001; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+
+  .btn {
+    appearance: none; border: 0; cursor: pointer; width: 100%;
+    font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; line-height: 1.2;
+    color: var(--accent-ink); background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    padding: 16px 18px; border-radius: 16px; box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 38%, transparent);
+    transition: transform .08s ease, filter .15s ease; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:hover { filter: brightness(1.05); }
+  .btn:active { transform: translateY(2px) scale(.995); }
+  .btn.secondary { background: transparent; color: var(--accent); box-shadow: none; border: 2px solid var(--line); font-size: 1rem; padding: 12px 16px; }
+  .btn:focus-visible, .linkish:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  input[type=file] { display: none; }
+  .hint { color: var(--muted); font-size: .9rem; text-align: center; margin: 0; text-wrap: balance; }
+  .linkish { background: none; border: 0; color: var(--accent); font: inherit; font-weight: 700; font-size: .88rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px; align-self: center; }
+  .lead { font-size: 1.08rem; text-align: center; margin: 0 auto; max-width: 34ch; text-wrap: balance; }
+
+  .gift { width: min(220px, 62vw); margin: 0 auto; cursor: pointer; }
+  .gift svg { width: 100%; height: auto; display: block; overflow: visible; animation: wiggle 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+  @keyframes wiggle { 0%, 70%, 100% { transform: rotate(0); } 76% { transform: rotate(-4deg); } 82% { transform: rotate(4deg); } 88% { transform: rotate(-2deg); } 94% { transform: rotate(1deg); } }
+  .g-shadow { fill: var(--line); }
+  .g-body { fill: var(--accent); }
+  .g-lidc { fill: var(--accent-2); }
+  .g-rib { fill: var(--gold-hi); }
+  .g-bow { fill: var(--gold-hi); stroke: var(--gold); stroke-width: 2; }
+  .g-dot { fill: color-mix(in srgb, var(--accent-ink) 30%, transparent); }
+  .g-lid { transform-box: fill-box; transform-origin: 20% 100%; transition: transform .6s cubic-bezier(.3, 1.6, .5, 1), opacity .6s; }
+  .gift.open svg { animation: none; }
+  .gift.open .g-lid { transform: translate(18px, -64px) rotate(-24deg); opacity: 0; }
+
+  .vf {
+    position: relative; width: 100%; max-width: 320px; aspect-ratio: 1 / 1; margin: 2px auto 0;
+    border-radius: 22px; overflow: hidden; background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    border: 2px solid var(--line);
+  }
+  .vf img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: filter .3s; max-width: 100%; }
+  .vf video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .vf[data-state="live"] .laser { opacity: 1; animation-duration: 1.6s; }
+  .torch { position: absolute; right: 18px; bottom: 18px; z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 0; font-size: 1.2rem; cursor: pointer; background: color-mix(in srgb, var(--surface) 85%, transparent); box-shadow: var(--shadow); }
+  .torch[aria-pressed="true"] { background: var(--gold-hi); }
+  .torch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .alts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; }
+  .vf-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .vf-overlay polygon { fill: color-mix(in srgb, var(--ok) 22%, transparent); stroke: var(--ok); stroke-linejoin: round; stroke-dasharray: 4000; stroke-dashoffset: 4000; animation: draw .7s ease-out forwards; }
+  .vf[data-state="wrong"] .vf-overlay polygon { fill: color-mix(in srgb, var(--warn) 22%, transparent); stroke: var(--warn); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .vf-idle { position: absolute; inset: 0; display: grid; place-items: center; color: var(--accent); }
+  .vf-idle svg { width: 42%; height: 42%; opacity: .85; }
+  .vf[data-state="ok"] .vf-idle { color: var(--ok); }
+  .vf[data-state="fail"] img { filter: grayscale(.7) brightness(.8); }
+  .laser { position: absolute; left: 8%; right: 8%; height: 3px; top: 10%; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--accent) 60%, transparent); opacity: .55; animation: sweep 2.4s ease-in-out infinite alternate; }
+  .vf[data-state="scanning"] .laser { opacity: 1; animation-duration: .8s; }
+  .vf[data-state="ok"] .laser, .vf[data-state="wrong"] .laser, .vf[data-state="fail"] .laser { display: none; }
+  @keyframes sweep { from { top: 10%; } to { top: 88%; } }
+  .corner { position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 2; transition: border-color .3s; }
+  .vf[data-state="ok"] .corner { border-color: var(--ok); }
+  .vf[data-state="wrong"] .corner, .vf[data-state="fail"] .corner { border-color: var(--warn); }
+  .corner.tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 12px; }
+  .corner.tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; border-top-right-radius: 12px; }
+  .corner.bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; border-bottom-left-radius: 12px; }
+  .corner.br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; border-bottom-right-radius: 12px; }
+  .status { margin: 0; text-align: center; font-weight: 800; min-height: 1.5em; text-wrap: balance; }
+  .status.ok { color: var(--ok); }
+  .status.bad { color: var(--warn); }
+  .status.busy { color: var(--muted); }
+
+  .card-input { display: flex; flex-direction: column; gap: 8px; }
+  .card-input label { font-size: .85rem; font-weight: 800; color: var(--muted); text-align: center; }
+  .card-input input { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; letter-spacing: .08em; text-align: center; border: 2px solid var(--line); border-radius: 14px; padding: 12px; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); color: var(--fg); outline: none; width: 100%; }
+  .card-input input:focus { border-color: var(--accent); }
+  .card-input input.shake { animation: shake .4s; border-color: var(--warn); }
+
+  .qhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .qcount { font-weight: 800; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .dots { display: flex; gap: 7px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background .2s, transform .2s; }
+  .dots i.done { background: var(--accent); }
+  .dots i.now { background: var(--accent); transform: scale(1.4); }
+  .qbody { display: flex; flex-direction: column; gap: 14px; }
+  .qbody.enter { animation: qin .35s ease-out both; }
+  @keyframes qin { from { opacity: .001; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+  .qtext { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; line-height: 1.2; text-align: center; text-wrap: balance; margin: 0; }
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    appearance: none; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-body); font-weight: 800; font-size: 1.05rem; color: var(--fg);
+    background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+    border: 2px solid var(--line); border-radius: 16px; padding: 12px 14px;
+    transition: transform .08s ease, border-color .15s, background .15s;
+  }
+  .opt .k { flex: none; width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-display); background: var(--surface); border: 2px solid var(--line); color: var(--accent); }
+  .opt:hover { border-color: var(--accent); }
+  .opt:active { transform: scale(.99); }
+  .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .opt.wrong { animation: shake .4s; border-color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); }
+  .opt.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, var(--surface)); }
+  .opt.right .k { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+  .opt:disabled { cursor: default; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+  .toast { text-align: center; font-weight: 800; color: var(--warn); min-height: 1.5em; margin: 0; }
+  .toast.ok { color: var(--ok); }
+
+  .ticket {
+    position: relative; border-radius: 18px; padding: 16px 16px 14px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, var(--surface)), color-mix(in srgb, var(--gold-hi) 22%, var(--surface)));
+    border: 2px dashed color-mix(in srgb, var(--accent) 35%, var(--line));
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .ticket::before, .ticket::after { content: ""; position: absolute; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); transform: translateY(-50%); }
+  .ticket::before { left: -12px; }
+  .ticket::after { right: -12px; }
+  .ticket-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .85rem; color: var(--accent); }
+  .serial { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .ticket-win { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; background: var(--surface); }
+  .prize { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; visibility: hidden; text-align: center; }
+  .prize-lead { font-weight: 800; color: var(--muted); font-size: .95rem; }
+  .prize-amt { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 17vw, 4.6rem); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .prize-amt small { font-size: .45em; color: var(--muted); }
+  .prize-sub { font-size: 1.5rem; }
+  #foil { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; transition: opacity .8s ease; }
+  #foil:active { cursor: grabbing; }
+  #foil.gone { opacity: 0; pointer-events: none; }
+  .ticket-foot { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .meter { flex: 1; height: 8px; border-radius: 8px; background: color-mix(in srgb, var(--fg) 10%, transparent); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold-hi), var(--accent)); border-radius: 8px; transition: width .2s; }
+
+  .gcard {
+    position: relative; width: 100%; max-width: 360px; aspect-ratio: 1.586; margin: 0 auto; border-radius: 20px; overflow: hidden;
+    color: var(--accent-ink); padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between;
+    background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--gold-hi) 55%, transparent), transparent 55%), linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 18px 40px color-mix(in srgb, var(--accent) 35%, transparent);
+    animation: flip .9s cubic-bezier(.2, 1.2, .3, 1) both;
+  }
+  .gcard::after { content: ""; position: absolute; inset: -50%; background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .35) 50%, transparent 58%); animation: shine 3.2s ease-in-out 1s infinite; }
+  @keyframes shine { 0% { transform: translateX(-60%); } 45%, 100% { transform: translateX(60%); } }
+  @keyframes flip { from { transform: perspective(800px) rotateY(80deg) scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
+  .gc-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .72rem; }
+  .chip { width: 42px; height: 32px; border-radius: 7px; background: linear-gradient(135deg, var(--gold-hi), #e0a92e); border: 1px solid rgba(0, 0, 0, .15); }
+  .gc-amt { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 14vw, 3.6rem); line-height: 1; font-variant-numeric: tabular-nums; }
+  .gc-amt small { font-size: .45em; opacity: .85; }
+  .gc-name { font-family: var(--font-hand); font-weight: 700; font-size: 1.5rem; line-height: 1; }
+
+  .letter { background: color-mix(in srgb, var(--gold-hi) 18%, var(--surface)); border-radius: 16px; padding: 16px 18px; border: 1px solid var(--line); transform: rotate(-.6deg); }
+  .letter p { margin: 0; font-family: var(--font-hand); font-weight: 600; font-size: 1.55rem; line-height: 1.2; color: var(--fg); }
+  .letter .sign { text-align: right; margin-top: 8px; color: var(--accent); font-weight: 700; }
+  .note { font-size: .82rem; color: var(--muted); text-align: center; margin: 0; }
+  .note.split { border-top: 1px dashed var(--line); padding-top: 14px; }
+
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  footer { margin-top: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gift svg, .laser, .gcard, .gcard::after, .panel.enter, .qbody.enter, .opt.wrong, .card-input input.shake { animation: none !important; }
+    .g-lid { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti" aria-hidden="true" hidden></canvas>
+<button class="sound" id="soundBtn" type="button" aria-pressed="true" aria-label="Wyłącz dźwięk">🔊</button>
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow" id="eyebrow">Urodzinowa niespodzianka</div>
+    <h1 id="headTitle">Cześć <span class="hl">Klaudio</span>!</h1>
+    <p class="sub" id="headSub">Mam dla Ciebie coś ekstra… ale tak łatwo nie będzie 😏</p>
+  </header>
+
+  <ol class="steps" id="steps" hidden>
+    <li data-step="scan"><span class="n">1</span><span>Karta</span></li>
+    <li data-step="quiz"><span class="n">2</span><span>Quiz</span></li>
+    <li data-step="scratch"><span class="n">3</span><span>Zdrapka</span></li>
+    <li data-step="finale"><span class="n">4</span><span>Prezent</span></li>
+  </ol>
+
+  <section class="panel" id="introPanel">
+    <div class="gift" id="gift" aria-hidden="true">
+      <svg viewBox="0 0 200 200">
+        <ellipse class="g-shadow" cx="100" cy="184" rx="66" ry="8"/>
+        <rect class="g-body" x="38" y="92" width="124" height="88" rx="10"/>
+        <circle class="g-dot" cx="62" cy="118" r="5"/><circle class="g-dot" cx="140" cy="150" r="6"/><circle class="g-dot" cx="70" cy="160" r="4"/><circle class="g-dot" cx="134" cy="112" r="4"/>
+        <rect class="g-rib" x="92" y="92" width="16" height="88"/>
+        <g class="g-lid">
+          <rect class="g-lidc" x="30" y="72" width="140" height="26" rx="8"/>
+          <rect class="g-rib" x="92" y="72" width="16" height="26"/>
+          <path class="g-bow" d="M100 72 C 82 38, 46 48, 66 70 Z"/>
+          <path class="g-bow" d="M100 72 C 118 38, 154 48, 134 70 Z"/>
+          <circle class="g-rib" cx="100" cy="70" r="8"/>
+        </g>
+      </svg>
+    </div>
+    <p class="lead" id="introText"></p>
+    <button class="btn" id="startBtn" type="button">Otwórz prezent 🎀</button>
+    <p class="hint">Zajmie Ci to ze 2 minuty. Przygotuj kartę od wujcia.</p>
+  </section>
+
+  <section class="panel" id="scanPanel" hidden>
+    <div class="vf" id="vf" data-state="idle">
+      <div class="vf-idle" id="vfIdle" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-7"/>
+        </svg>
+      </div>
+      <video id="vfVideo" playsinline muted autoplay hidden></video>
+      <img id="vfImg" alt="Zdjęcie karty" hidden>
+      <svg class="vf-overlay" id="vfOverlay" preserveAspectRatio="xMidYMid slice" aria-hidden="true" hidden><polygon id="vfPoly" points=""/></svg>
+      <span class="laser" aria-hidden="true"></span>
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <button class="torch" id="torchBtn" type="button" aria-pressed="false" aria-label="Latarka" hidden>🔦</button>
+    </div>
+    <p class="status" id="scanStatus" role="status"></p>
+    <button class="btn" id="camBtn" type="button">📷 Włącz aparat</button>
+    <input type="file" id="file" accept="image/*" capture="environment">
+    <p class="hint" id="scanHint">Telefon zapyta o dostęp do aparatu. Pozwól, wyceluj w kod QR na karcie, a apka złapie go sama.</p>
+    <div class="alts">
+      <button class="linkish" id="photoBtn" type="button">Zrób zdjęcie zamiast tego</button>
+      <button class="linkish" id="manualToggle" type="button">Wpisz numer z karty</button>
+    </div>
+    <form class="card-input" id="manualBox" hidden>
+      <label for="manualNum">Numer z karty</label>
+      <input id="manualNum" name="manualNum" type="text" inputmode="numeric" autocomplete="off" placeholder="cyfry spod kodu QR">
+      <button class="btn secondary" type="submit">Sprawdź numer</button>
+    </form>
+  </section>
+
+  <section class="panel" id="quizPanel" hidden>
+    <div class="qhead">
+      <span class="qcount" id="qcount"></span>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </div>
+    <div class="qbody" id="qbody">
+      <p class="qtext" id="qtext"></p>
+      <div class="opts" id="opts"></div>
+    </div>
+    <p class="toast" id="toast" role="status"></p>
+  </section>
+
+  <section class="panel" id="scratchPanel" hidden>
+    <div class="ticket">
+      <div class="ticket-top"><span>Zdrapka urodzinowa</span><span class="serial">Nº 0001</span></div>
+      <div class="ticket-win" id="ticketWin">
+        <div class="prize" id="prize">
+          <span class="prize-sub" aria-hidden="true">💸</span>
+          <span class="prize-lead">Na Twojej karcie jest</span>
+          <span class="prize-amt"><span id="prizeAmt">300</span> <small>zł</small></span>
+        </div>
+        <canvas id="foil" aria-label="Złote pole do zdrapania"></canvas>
+      </div>
+      <div class="ticket-foot"><div class="meter"><i id="meterBar"></i></div><span id="meterTxt">0%</span></div>
+    </div>
+    <p class="hint" id="scratchHint">Drap palcem po złotym polu 👆</p>
+    <button class="btn" id="claimBtn" type="button" hidden>Odbierz prezent 🎁</button>
+    <button class="linkish" id="revealBtn" type="button">Odkryj bez drapania</button>
+  </section>
+
+  <section class="panel" id="finalePanel" hidden>
+    <div class="gcard" id="gcard">
+      <div class="gc-top"><span>Karta prezentowa</span><span class="chip" aria-hidden="true"></span></div>
+      <div class="gc-amt"><span id="fAmount">0</span> <small>zł</small></div>
+      <div class="gc-name" id="gcName"></div>
+    </div>
+    <div class="letter">
+      <p id="fMsg"></p>
+      <p class="sign">wujcio 💋</p>
+    </div>
+    <a class="btn" id="futureLink" target="_blank" rel="noopener">💳 Sprawdź saldo karty ↗</a>
+    <p class="note split" id="futureNote"></p>
+    <button class="linkish" id="againBtn" type="button">Przejdź wszystko jeszcze raz</button>
+  </section>
+
+  <footer>
+    <p class="note">Zrobione z miłością na urodziny 🎈</p>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+(function () {
+  var CONFIG = {
+    nameVocative: 'Klaudio',
+    nameGenitive: 'Klaudii',
+    cardHash: '94997d1d481c5f74fb1bd98f3a4613305b533e358ca8b541a312fddb7ff1d0fb',
+    cardLen: 9,
+    balance: 300,
+    futureUrl: 'https://www.finpay.pl/stansrodkow',
+    introText: 'Pewnie myślisz: „ile wujcio tam przelał na kartę?” 🤔 Ha! Nie tak łatwo. Zanim poznasz kwotę, czeka Cię kilka zadań 😏',
+    finaleMsg: '{name}, wszystkiego najlepszego! Leć do Sfery i szalej, bo dziś Ci wszystko wolno 🛍️✨ Buziaki!',
+    futureNote: 'Saldo karty sprawdzisz zawsze na finpay.pl/stansrodkow',
+    scratchGoal: 0.55,
+    questions: [
+      { q: 'Zacznijmy od ważnego pytania: co jest NAJLEPSZE w urodzinach?',
+        opts: ['Tort 🎂', 'Prezenty! 🎁', 'Życzenia 💌', 'Sprzątanie po imprezie 🧹'], ok: 1,
+        toast: 'Noo błagam, kto tak uważa? 😄 Jeszcze raz!' },
+      { q: 'Kto wymyślił tę całą zwariowaną niespodziankę?',
+        opts: ['Wujcio 😎', 'Mikołaj 🎅', 'Sąsiad z parteru 🤔', 'Yeti ❄️'], ok: 0,
+        toast: 'Hahaha, no coś Ty! Pomyśl… 🤭' },
+      { q: 'Zagadka! Mam cyferki, uwielbiam sklepy, a w środku chowam niespodziankę. Co to?',
+        opts: ['Kalkulator 🧮', 'Karta podarunkowa 💳', 'Pilot do TV 📺', 'Zegarek ⌚'], ok: 1,
+        toast: 'Blisko… ale nie! 😏' },
+      { q: 'Szybka matma urodzinowa: ile prezentów to za mało?',
+        opts: ['Jeden 1️⃣', 'Nigdy nie jest za mało! ♾️', 'Dziesięć 🔟', 'Zero 🚫'], ok: 1,
+        toast: 'Eee, policz jeszcze raz! 😄' },
+      { q: 'Ostatnie pytanie! Gotowa poznać swoją niespodziankę?',
+        opts: ['TAK!!! 🙌', 'Jeszcze chwilkę 😬', 'Może jutro 😴', 'Nie wiem 🤷‍♀️'], ok: 0,
+        toast: 'Oj tam, na pewno TAK! 😜' }
+    ]
+  };
+
+  var STORE_KEY = 'urodziny-klaudia-v2';
+  var STAGES = ['intro', 'scan', 'quiz', 'scratch', 'finale'];
+  var $ = function (id) { return document.getElementById(id); };
+  var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var state = { stage: 'intro', qi: 0 };
+  var timers = [];
+
+  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+  function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || 'null') || {}; } catch (e) { return {}; } }
+  function buzz(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+  function fmt(n) { return Number(n).toLocaleString('pl-PL'); }
+
+  $('introText').textContent = CONFIG.introText;
+  $('futureLink').href = CONFIG.futureUrl;
+  $('futureNote').textContent = CONFIG.futureNote;
+  $('gcName').textContent = 'dla ' + CONFIG.nameGenitive;
+  $('prizeAmt').textContent = fmt(CONFIG.balance);
+
+  var soundOn = true;
+  try { soundOn = localStorage.getItem(STORE_KEY + '-sound') !== 'off'; } catch (e) {}
+  function paintSound() {
+    $('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+    $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+    $('soundBtn').setAttribute('aria-label', soundOn ? 'Wyłącz dźwięk' : 'Włącz dźwięk');
+  }
+  paintSound();
+  $('soundBtn').addEventListener('click', function () {
+    soundOn = !soundOn;
+    try { localStorage.setItem(STORE_KEY + '-sound', soundOn ? 'on' : 'off'); } catch (e) {}
+    paintSound();
+    if (soundOn) sfx.ok();
+  });
+
+  var AC = null;
+  function audio() {
+    if (!soundOn) return null;
+    try {
+      if (!AC) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; AC = new C(); }
+      if (AC.state === 'suspended') AC.resume();
+      return AC;
+    } catch (e) { return null; }
+  }
+  function tone(freq, at, dur, type, vol) {
+    var a = audio(); if (!a) return;
+    var o = a.createOscillator(), g = a.createGain(), s = a.currentTime + at;
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, s);
+    g.gain.exponentialRampToValueAtTime(vol || 0.16, s + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, s + dur);
+    o.connect(g); g.connect(a.destination); o.start(s); o.stop(s + dur + 0.05);
+  }
+  var sfx = {
+    tap: function () { tone(660, 0, 0.08, 'sine', 0.08); },
+    ok: function () { tone(784, 0, 0.18, 'triangle'); tone(1175, 0.09, 0.28, 'triangle'); },
+    bad: function () { tone(233, 0, 0.16, 'square', 0.05); tone(185, 0.1, 0.22, 'square', 0.05); },
+    scan: function () { tone(1320, 0, 0.09, 'sine', 0.1); tone(1760, 0.08, 0.14, 'sine', 0.1); },
+    fanfare: function () {
+      [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.11, 0.32, 'triangle', 0.15); });
+      tone(784, 0.5, 0.7, 'triangle', 0.12); tone(1047, 0.5, 0.8, 'triangle', 0.15); tone(1319, 0.5, 0.9, 'sine', 0.08);
+    }
+  };
+
+  var panels = { intro: $('introPanel'), scan: $('scanPanel'), quiz: $('quizPanel'), scratch: $('scratchPanel'), finale: $('finalePanel') };
+  var HEADS = {
+    intro:   ['Urodzinowa niespodzianka', 'Cześć <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Mam dla Ciebie coś ekstra… ale tak łatwo nie będzie 😏'],
+    scan:    ['Krok 1 · Karta 🔑', 'Pokaż kartę', 'Wyceluj aparat w kod QR na karcie, żeby odblokować zabawę.'],
+    quiz:    ['Krok 2 · Quiz 🧩', 'Szybki quiz', 'Pięć pytań. Pomyłki wolno, poddawać się nie 😉'],
+    scratch: ['Krok 3 · Zdrapka ✨', 'Ile tam jest?', 'Zdrap złote pole i sprawdź, co wujcio wrzucił na kartę.'],
+    finale:  ['Krok 4 · Prezent 🎁', 'Sto lat, <span class="hl">' + CONFIG.nameVocative + '</span>!', 'Wszystko odblokowane. Oto Twój prezent ✨']
+  };
+
+  function show(stage) {
+    clearTimers();
+    if (stage !== 'scan') stopCamera();
+    state.stage = stage;
+    for (var k in panels) {
+      var on = k === stage;
+      panels[k].hidden = !on;
+      panels[k].classList.remove('enter');
+      if (on) { void panels[k].offsetWidth; panels[k].classList.add('enter'); }
+    }
+    if (stage !== 'finale' && stage !== 'scratch') stopConfetti();
+    var h = HEADS[stage];
+    $('eyebrow').textContent = h[0];
+    $('headTitle').innerHTML = h[1];
+    $('headSub').textContent = h[2];
+    $('steps').hidden = stage === 'intro';
+    var idx = STAGES.indexOf(stage);
+    var lis = $('steps').querySelectorAll('li');
+    for (var i = 0; i < lis.length; i++) {
+      var si = STAGES.indexOf(lis[i].getAttribute('data-step'));
+      lis[i].className = si < idx ? 'done' : (si === idx ? 'now' : '');
+    }
+    save();
+    window.scrollTo(0, 0);
+  }
+
+  $('startBtn').addEventListener('click', function () {
+    sfx.ok();
+    if (reduceMotion) { goScan(); return; }
+    $('gift').classList.add('open');
+    var r = $('gift').getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height * 0.35, 70, 0.7);
+    setTimeout(function () { $('gift').classList.remove('open'); goScan(); }, 900);
+  });
+  $('gift').addEventListener('click', function () { $('startBtn').click(); });
+
+  var fileInput = $('file');
+  var video = $('vfVideo');
+  var cam = { stream: null, track: null, running: false, detector: null, timer: null, lastWrong: '', lastWrongAt: 0, torch: false };
+  var work = document.createElement('canvas');
+  var wctx = work.getContext('2d', { willReadFrequently: true });
+
+  function goScan() { resetScan(); show('scan'); autoStart(); }
+  function autoStart() {
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'camera' }).then(function (p) {
+          if (p.state === 'granted' && state.stage === 'scan' && !cam.stream) startCamera();
+        }).catch(function () {});
+      }
+    } catch (e) {}
+  }
+  function resetScan() {
+    stopCamera();
+    setVF('idle');
+    $('vfIdle').hidden = false;
+    video.hidden = true;
+    $('vfImg').hidden = true; $('vfImg').removeAttribute('src');
+    $('vfOverlay').hidden = true;
+    $('torchBtn').hidden = true;
+    setStatus('', '');
+    $('camBtn').textContent = '📷 Włącz aparat';
+    $('camBtn').hidden = false;
+  }
+  function setVF(s) { $('vf').setAttribute('data-state', s); }
+  function setStatus(text, tone) { $('scanStatus').textContent = text; $('scanStatus').className = 'status ' + (tone || ''); }
+
+  function startCamera() {
+    if (cam.stream) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('Ta przeglądarka nie daje dostępu do aparatu. Zrób zdjęcie kodu albo wpisz numer.', 'bad');
+      return;
+    }
+    $('camBtn').hidden = true;
+    $('vfOverlay').hidden = true;
+    setStatus('Włączam aparat…', 'busy');
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    }).then(function (stream) {
+      if (state.stage !== 'scan') { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      cam.stream = stream;
+      cam.track = stream.getVideoTracks()[0];
+      video.srcObject = stream;
+      video.hidden = false;
+      $('vfIdle').hidden = true;
+      $('vfImg').hidden = true;
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+      setVF('live');
+      setStatus('Wyceluj w kod QR na karcie 🎯', 'busy');
+      try {
+        var caps = cam.track.getCapabilities && cam.track.getCapabilities();
+        if (caps && caps.torch) $('torchBtn').hidden = false;
+      } catch (e) {}
+      prepareDetector().then(function () { cam.running = true; loop(); });
+    }).catch(function (e) {
+      $('camBtn').hidden = false;
+      $('camBtn').textContent = '📷 Spróbuj włączyć aparat';
+      setStatus(e && e.name === 'NotAllowedError'
+        ? 'Brak zgody na aparat. Stuknij 🔒 obok adresu strony, zezwól na aparat i spróbuj jeszcze raz.'
+        : 'Nie udało się włączyć aparatu. Zrób zdjęcie kodu albo wpisz numer z karty.', 'bad');
+    });
+  }
+  function prepareDetector() {
+    if (cam.detector || !('BarcodeDetector' in window)) return Promise.resolve();
+    return BarcodeDetector.getSupportedFormats().then(function (f) {
+      if (f.indexOf('qr_code') >= 0) cam.detector = new BarcodeDetector({ formats: ['qr_code'] });
+    }).catch(function () {});
+  }
+  function stopCamera() {
+    cam.running = false;
+    clearTimeout(cam.timer);
+    if (cam.stream) cam.stream.getTracks().forEach(function (t) { t.stop(); });
+    cam.stream = null; cam.track = null; cam.torch = false;
+    $('torchBtn').setAttribute('aria-pressed', 'false');
+    video.srcObject = null;
+  }
+  function loop() { if (cam.running) cam.timer = setTimeout(scanFrame, 120); }
+  function scanFrame() {
+    if (!cam.running) return;
+    if (video.readyState < 2 || !video.videoWidth) { loop(); return; }
+    var job;
+    if (cam.detector) {
+      job = cam.detector.detect(video).then(function (codes) {
+        if (!codes || !codes.length) return null;
+        return { data: codes[0].rawValue, pts: codes[0].cornerPoints, w: video.videoWidth, h: video.videoHeight };
+      }).catch(function () { cam.detector = null; return null; });
+    } else {
+      job = Promise.resolve(jsqrFrame());
+    }
+    job.then(function (hit) {
+      if (!cam.running) return;
+      if (!hit) { loop(); return; }
+      return handleLiveHit(hit);
+    });
+  }
+  function jsqrFrame() {
+    if (typeof jsQR !== 'function') return null;
+    var vw = video.videoWidth, vh = video.videoHeight;
+    var s = Math.min(1, 720 / Math.max(vw, vh));
+    var w = Math.round(vw * s), h = Math.round(vh * s);
+    work.width = w; work.height = h;
+    wctx.drawImage(video, 0, 0, w, h);
+    var c = jsQR(wctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'dontInvert' });
+    if (!c || !c.data) return null;
+    var L = c.location;
+    return { data: c.data, pts: [L.topLeftCorner, L.topRightCorner, L.bottomRightCorner, L.bottomLeftCorner], w: w, h: h };
+  }
+  function handleLiveHit(hit) {
+    return isRightCard(hit.data).then(function (ok) {
+      if (!cam.running) return;
+      if (ok) {
+        cam.running = false;
+        drawPoly(hit);
+        video.pause();
+        cardAccepted();
+        return;
+      }
+      var now = Date.now();
+      if (hit.data !== cam.lastWrong || now - cam.lastWrongAt > 3000) {
+        cam.lastWrong = hit.data; cam.lastWrongAt = now;
+        drawPoly(hit);
+        cardWrong(true);
+      }
+      loop();
+    });
+  }
+
+  $('camBtn').addEventListener('click', function () {
+    if ($('vf').getAttribute('data-state') === 'wrong' && !cam.stream) { resetScan(); }
+    startCamera();
+  });
+  $('torchBtn').addEventListener('click', function () {
+    if (!cam.track) return;
+    cam.torch = !cam.torch;
+    $('torchBtn').setAttribute('aria-pressed', String(cam.torch));
+    cam.track.applyConstraints({ advanced: [{ torch: cam.torch }] }).catch(function () {});
+  });
+  $('photoBtn').addEventListener('click', function () { stopCamera(); fileInput.value = ''; fileInput.click(); });
+  document.addEventListener('visibilitychange', function () {
+    if (state.stage !== 'scan') return;
+    if (document.hidden) { if (cam.stream) resetScan(); }
+    else autoStart();
+  });
+
+  $('manualToggle').addEventListener('click', function () {
+    var box = $('manualBox'); box.hidden = !box.hidden;
+    if (!box.hidden) $('manualNum').focus();
+  });
+  $('manualBox').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('manualNum').value || '';
+    isRightCard(v).then(function (ok) {
+      if (ok) {
+        stopCamera();
+        video.hidden = true; $('vfImg').hidden = true; $('vfOverlay').hidden = true; $('vfIdle').hidden = false;
+        cardAccepted();
+      } else {
+        var inp = $('manualNum');
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        sfx.bad(); buzz(80);
+        setStatus(v.replace(/\D/g, '').length ? 'Ten numer nie pasuje. Sprawdź cyfry pod kodem QR 🧐' : 'Wpisz numer z karty 🙂', 'bad');
+      }
+    });
+  });
+
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    var url = URL.createObjectURL(f);
+    var img = $('vfImg');
+    video.hidden = true;
+    $('vfIdle').hidden = true;
+    $('vfOverlay').hidden = true;
+    setVF('scanning');
+    setStatus('Szukam kodu…', 'busy');
+    $('camBtn').hidden = true;
+    img.onload = function () {
+      img.hidden = false;
+      setTimeout(function () {
+        var res = null;
+        try { res = decodeImage(img); } catch (e) { res = null; }
+        if (!res) { scanFailed(); return; }
+        drawPoly(res);
+        isRightCard(res.data).then(function (ok) { if (ok) cardAccepted(); else cardWrong(false); });
+      }, reduceMotion ? 200 : 1100);
+    };
+    img.onerror = function () { scanFailed(); };
+    img.src = url;
+  });
+
+  function decodeImage(img) {
+    if (typeof jsQR !== 'function') return null;
+    var sizes = [1000, 1600, 640];
+    for (var i = 0; i < sizes.length; i++) {
+      var scale = Math.min(1, sizes[i] / Math.max(img.naturalWidth, img.naturalHeight));
+      var w = Math.max(1, Math.round(img.naturalWidth * scale));
+      var h = Math.max(1, Math.round(img.naturalHeight * scale));
+      work.width = w; work.height = h;
+      wctx.drawImage(img, 0, 0, w, h);
+      var code = jsQR(wctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'attemptBoth' });
+      if (code && code.data) {
+        var L = code.location;
+        return { data: code.data, pts: [L.topLeftCorner, L.topRightCorner, L.bottomRightCorner, L.bottomLeftCorner], w: w, h: h };
+      }
+      if (scale === 1 && i > 0) break;
+    }
+    return null;
+  }
+  function drawPoly(hit) {
+    var pts = hit.pts.map(function (p) { return Math.round(p.x) + ',' + Math.round(p.y); }).join(' ');
+    var svg = $('vfOverlay'), poly = $('vfPoly');
+    svg.setAttribute('viewBox', '0 0 ' + hit.w + ' ' + hit.h);
+    var clone = poly.cloneNode(true);
+    clone.setAttribute('points', pts);
+    clone.setAttribute('stroke-width', String(Math.max(hit.w, hit.h) / 80));
+    poly.parentNode.replaceChild(clone, poly);
+    svg.hidden = false;
+  }
+  function sha256(s) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function (b) {
+      return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+    });
+  }
+  function isRightCard(value) {
+    var v = String(value || '');
+    if (/finpay\.pl\/stansrodkow/i.test(v)) return Promise.resolve(true);
+    var digits = v.replace(/\D/g, ''), L = CONFIG.cardLen, jobs = [];
+    if (!window.crypto || !crypto.subtle) return Promise.resolve(false);
+    for (var i = 0; i + L <= digits.length; i++) jobs.push(sha256(digits.substr(i, L)));
+    return Promise.all(jobs).then(function (hs) { return hs.indexOf(CONFIG.cardHash) !== -1; });
+  }
+  function cardAccepted() {
+    setVF('ok');
+    setStatus('✓ Jest! To Twoja karta', 'ok');
+    $('camBtn').hidden = true;
+    $('torchBtn').hidden = true;
+    sfx.scan(); buzz([40, 30, 40]);
+    later(startQuiz, 1500);
+  }
+  function cardWrong(live) {
+    setVF('wrong');
+    setStatus('🤨 Hmm, to nie ta karta. Pokaż tę z kartki od wujcia', 'bad');
+    sfx.bad(); buzz(120);
+    if (live) {
+      later(function () {
+        if (!cam.running) return;
+        setVF('live'); $('vfOverlay').hidden = true;
+        setStatus('Wyceluj w kod QR na karcie 🎯', 'busy');
+      }, 2200);
+    } else {
+      $('camBtn').textContent = '📷 Skanuj jeszcze raz';
+      $('camBtn').hidden = false;
+    }
+  }
+  function scanFailed() {
+    setVF('fail');
+    setStatus('Nie widzę tu kodu QR. Więcej światła, cały kod w kadrze i telefon nieruchomo nad kartą.', 'bad');
+    $('camBtn').textContent = '📷 Skanuj aparatem na żywo';
+    $('camBtn').hidden = false;
+    sfx.bad(); buzz(120);
+  }
+
+  function startQuiz(qi) { state.qi = qi || 0; show('quiz'); renderQ(); }
+  function renderQ() {
+    var q = CONFIG.questions[state.qi];
+    $('toast').textContent = ''; $('toast').className = 'toast';
+    $('qcount').textContent = 'Pytanie ' + (state.qi + 1) + ' z ' + CONFIG.questions.length;
+    $('qtext').textContent = q.q;
+    var d = $('dots'); d.innerHTML = '';
+    for (var i = 0; i < CONFIG.questions.length; i++) {
+      var el = document.createElement('i');
+      el.className = i < state.qi ? 'done' : (i === state.qi ? 'now' : '');
+      d.appendChild(el);
+    }
+    var box = $('opts'); box.innerHTML = '';
+    q.opts.forEach(function (text, idx) {
+      var b = document.createElement('button');
+      b.className = 'opt'; b.type = 'button';
+      var k = document.createElement('span'); k.className = 'k'; k.textContent = 'ABCD'.charAt(idx);
+      var t = document.createElement('span'); t.textContent = text;
+      b.appendChild(k); b.appendChild(t);
+      b.addEventListener('click', function () { answer(b, idx, q); });
+      box.appendChild(b);
+    });
+    var body = $('qbody'); body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
+    save();
+  }
+  function answer(btn, idx, q) {
+    if (idx === q.ok) {
+      btn.classList.add('right');
+      $('toast').className = 'toast ok';
+      $('toast').textContent = ['Brawo! 🎉', 'Dokładnie! 😎', 'Tak jest! ⭐', 'Mistrzyni! 🏆', 'No pewnie! 🙌'][state.qi % 5];
+      var bs = document.querySelectorAll('#opts .opt');
+      for (var i = 0; i < bs.length; i++) bs[i].disabled = true;
+      sfx.ok(); buzz(30);
+      var r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 24, 0.35);
+      later(function () {
+        state.qi++;
+        if (state.qi >= CONFIG.questions.length) { startScratch(); } else { renderQ(); }
+      }, 800);
+    } else {
+      btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong');
+      $('toast').className = 'toast';
+      $('toast').textContent = q.toast;
+      sfx.bad(); buzz(90);
+    }
+  }
+
+  var foil = $('foil');
+  var sc = { ctx: null, d: 1, down: false, last: null, moves: 0, progress: 0, done: false, w: 0 };
+
+  function startScratch() {
+    show('scratch');
+    sc.done = false; sc.progress = 0; sc.down = false;
+    $('claimBtn').hidden = true; $('revealBtn').hidden = false;
+    $('scratchHint').textContent = 'Drap palcem po złotym polu 👆';
+    foil.classList.remove('gone');
+    $('prize').style.visibility = 'hidden';
+    requestAnimationFrame(function () { requestAnimationFrame(drawFoil); });
+  }
+  function drawFoil() {
+    var r = $('ticketWin').getBoundingClientRect();
+    if (!r.width) return;
+    var d = Math.min(window.devicePixelRatio || 1, 2);
+    var W = Math.round(r.width * d), H = Math.round(r.height * d);
+    foil.width = W; foil.height = H; sc.d = d; sc.w = r.width;
+    var c = foil.getContext('2d', { willReadFrequently: true });
+    c.globalCompositeOperation = 'source-over';
+    var g = c.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#c99a2e'); g.addColorStop(0.3, '#ffe9a3'); g.addColorStop(0.5, '#d9a93a');
+    g.addColorStop(0.72, '#fff2c4'); g.addColorStop(1, '#b8861f');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    for (var i = 0; i < 2200; i++) {
+      c.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.35)' : 'rgba(110,70,0,0.18)';
+      c.fillRect(Math.random() * W, Math.random() * H, d * (1 + Math.random() * 1.5), d * (1 + Math.random() * 1.5));
+    }
+    c.save();
+    c.translate(W / 2, H / 2); c.rotate(-0.22);
+    c.fillStyle = 'rgba(120,78,0,0.16)';
+    c.font = '800 ' + Math.round(13 * d) + 'px "Baloo 2", sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (var y = -H; y < H; y += 26 * d) {
+      for (var x = -W; x < W; x += 96 * d) c.fillText('★ ZDRAP ★', x + ((y / (26 * d)) % 2 ? 48 * d : 0), y);
+    }
+    c.restore();
+    c.fillStyle = 'rgba(92,58,0,0.85)';
+    c.font = '800 ' + Math.round(26 * d) + 'px "Baloo 2", sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('ZDRAP TUTAJ', W / 2, H / 2 - 8 * d);
+    c.font = '700 ' + Math.round(14 * d) + 'px "Nunito", sans-serif';
+    c.fillText('i zobacz kwotę 💰', W / 2, H / 2 + 20 * d);
+    c.globalCompositeOperation = 'destination-out';
+    c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = 40 * d;
+    sc.ctx = c;
+    $('prize').style.visibility = 'visible';
+    setMeter(0);
+  }
+  function pt(e) { var r = foil.getBoundingClientRect(); return { x: (e.clientX - r.left) * sc.d, y: (e.clientY - r.top) * sc.d }; }
+  function dab(a, b) {
+    var c = sc.ctx; if (!c) return;
+    if (!b || (a.x === b.x && a.y === b.y)) { c.beginPath(); c.arc(a.x, a.y, c.lineWidth / 2, 0, Math.PI * 2); c.fill(); return; }
+    c.beginPath(); c.moveTo(b.x, b.y); c.lineTo(a.x, a.y); c.stroke();
+  }
+  foil.addEventListener('pointerdown', function (e) {
+    if (sc.done || !sc.ctx) return;
+    e.preventDefault();
+    sc.down = true; try { foil.setPointerCapture(e.pointerId); } catch (x) {}
+    var p = pt(e); dab(p, null); sc.last = p;
+    audio();
+  });
+  foil.addEventListener('pointermove', function (e) {
+    if (!sc.down || sc.done) return;
+    var p = pt(e); dab(p, sc.last); sc.last = p;
+    if (++sc.moves % 6 === 0) checkProgress();
+    if (sc.moves % 14 === 0) { tone(1800 + Math.random() * 900, 0, 0.03, 'sawtooth', 0.012); }
+  });
+  function endStroke() { if (!sc.down) return; sc.down = false; sc.last = null; checkProgress(); }
+  foil.addEventListener('pointerup', endStroke);
+  foil.addEventListener('pointercancel', endStroke);
+
+  function checkProgress() {
+    if (sc.done || !sc.ctx) return;
+    var W = foil.width, H = foil.height;
+    var data = sc.ctx.getImageData(0, 0, W, H).data;
+    var step = Math.max(4, Math.round(10 * sc.d)), clear = 0, total = 0;
+    for (var y = 0; y < H; y += step) {
+      for (var x = 0; x < W; x += step) { total++; if (data[(y * W + x) * 4 + 3] < 40) clear++; }
+    }
+    sc.progress = total ? clear / total : 0;
+    setMeter(Math.min(1, sc.progress / CONFIG.scratchGoal));
+    if (sc.progress > 0.15 && sc.progress < CONFIG.scratchGoal) $('scratchHint').textContent = 'Jeszcze trochę… już coś widać? 👀';
+    if (sc.progress >= CONFIG.scratchGoal) finishScratch();
+  }
+  function setMeter(p) {
+    var v = Math.round(p * 100);
+    $('meterBar').style.width = v + '%';
+    $('meterTxt').textContent = v + '%';
+  }
+  function finishScratch() {
+    if (sc.done) return;
+    sc.done = true; sc.down = false;
+    foil.classList.add('gone');
+    setMeter(1);
+    sfx.fanfare(); buzz([40, 40, 80]);
+    var r = $('ticketWin').getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 110, 1);
+    $('scratchHint').textContent = 'WOW! 🤩 Kwota odkryta. Odbierz swój prezent 👇';
+    $('revealBtn').hidden = true;
+    later(function () { $('claimBtn').hidden = false; $('claimBtn').focus({ preventScroll: true }); }, 700);
+  }
+  $('revealBtn').addEventListener('click', finishScratch);
+  $('claimBtn').addEventListener('click', runFinale);
+
+  function runFinale() {
+    show('finale');
+    $('fMsg').textContent = CONFIG.finaleMsg.replace('{name}', CONFIG.nameVocative);
+    var el = $('fAmount');
+    if (reduceMotion) { el.textContent = fmt(CONFIG.balance); return; }
+    el.textContent = '0';
+    later(function () {
+      sfx.fanfare();
+      countUp(el, CONFIG.balance, 1200);
+      burst(innerWidth / 2, innerHeight * 0.3, 150, 1.1);
+    }, 500);
+    later(function () { burst(innerWidth * 0.1, innerHeight * 0.55, 70, 0.9, 1); }, 1300);
+    later(function () { burst(innerWidth * 0.9, innerHeight * 0.55, 70, 0.9, -1); }, 1700);
+  }
+  function countUp(el, target, dur) {
+    var start = performance.now();
+    function step(now) {
+      var p = Math.min(1, (now - start) / dur);
+      el.textContent = fmt(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  $('againBtn').addEventListener('click', function () {
+    state = { stage: 'intro', qi: 0 };
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    $('manualNum').value = ''; $('manualBox').hidden = true;
+    show('intro');
+  });
+
+  var cv = $('confetti'), cctx = cv.getContext('2d');
+  var parts = [], raf = null, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var COLORS = ['#e83a8e', '#ffcf4d', '#49c6e5', '#7bd389', '#ff8f5a', '#b794f6', '#ffffff'];
+  function sizeCanvas() { cv.width = Math.floor(innerWidth * dpr); cv.height = Math.floor(innerHeight * dpr); }
+  function burst(x, y, n, power, dir) {
+    if (reduceMotion) return;
+    if (cv.hidden) { cv.hidden = false; sizeCanvas(); }
+    for (var i = 0; i < n; i++) {
+      var vx = dir ? dir * (3 + Math.random() * 10) * power : (Math.random() - 0.5) * 16 * power;
+      parts.push({
+        x: x + (Math.random() - 0.5) * 30, y: y,
+        vx: vx, vy: (Math.random() * -12 - 5) * power,
+        g: 0.3 + Math.random() * 0.15, s: 5 + Math.random() * 7,
+        rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.35,
+        round: Math.random() < 0.3,
+        color: COLORS[(Math.random() * COLORS.length) | 0], life: 0
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    cctx.clearRect(0, 0, cv.width, cv.height);
+    var keep = [];
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.985; p.rot += p.vr; p.life++;
+      var a = Math.max(0, 1 - p.life / 180);
+      if (p.y > innerHeight + 40 || a <= 0) continue;
+      keep.push(p);
+      cctx.save(); cctx.globalAlpha = a;
+      cctx.translate(p.x * dpr, p.y * dpr); cctx.rotate(p.rot);
+      cctx.fillStyle = p.color;
+      if (p.round) { cctx.beginPath(); cctx.arc(0, 0, p.s * 0.4 * dpr, 0, 6.283); cctx.fill(); }
+      else cctx.fillRect(-p.s / 2 * dpr, -p.s * 0.3 * dpr, p.s * dpr, p.s * 0.6 * dpr);
+      cctx.restore();
+    }
+    parts = keep;
+    if (parts.length) raf = requestAnimationFrame(tick); else stopConfetti();
+  }
+  function stopConfetti() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    parts = []; cctx.clearRect(0, 0, cv.width, cv.height); cv.hidden = true;
+  }
+  window.addEventListener('resize', function () {
+    if (!cv.hidden) sizeCanvas();
+    if (state.stage === 'scratch' && !sc.done && sc.progress < 0.02) {
+      var w = $('ticketWin').getBoundingClientRect().width;
+      if (Math.abs(w - sc.w) > 4) drawFoil();
+    }
+  });
+
+  function goto(stage, qi) {
+    if (stage === 'scan') goScan();
+    else if (stage === 'quiz') startQuiz(Math.min(qi || 0, CONFIG.questions.length - 1));
+    else if (stage === 'scratch') startScratch();
+    else if (stage === 'finale') runFinale();
+    else show('intro');
+  }
+  var HASH = { start: 'intro', karta: 'scan', skan: 'scan', quiz: 'quiz', zdrapka: 'scratch', prezent: 'finale', final: 'finale' };
+
+  function start(data) {
+    var saved = (data && data.stage) ? data : load();
+    var h = (location.hash || '').slice(1).toLowerCase();
+    if (HASH[h]) saved = { stage: HASH[h], qi: 0 };
+    goto(STAGES.indexOf(saved.stage) >= 0 ? saved.stage : 'intro', saved.qi);
+  }
+  start({});
+})();
+</script>
+</body>
+</html>
